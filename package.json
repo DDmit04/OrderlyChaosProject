@@ -1,0 +1,31 @@
+{
+  "name": "smallProject",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.4.4",
+    "bootstrap": "^4.3.1",
+    "bootstrap-vue": "^2.0.0-rc.22",
+    "css-loader": "^2.1.1",
+    "jquery": "^3.4.1",
+    "vue": "^2.6.10",
+    "vue-awesome": "^3.5.4",
+    "vue-resource": "^1.5.1",
+    "vuex": "^3.1.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "babel-loader": "^8.0.6",
+    "resolve-url-loader": "^3.1.0",
+    "vue-loader": "^15.7.0",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.3",
+    "webpack-dev-server": "^3.7.1"
+  }
+}
