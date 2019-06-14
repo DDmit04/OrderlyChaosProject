@@ -20,51 +20,65 @@
                         <button class='btn btn-danger' @click='resetCanvas'>reset</button>
                         <div class='mt-4 form-inline'>
                             <label>draw Speed: <input class='form-control ml-2' v-model='drawSpeed'/></label>
-                            <input type="range" v-model='drawSpeed' class="custom-range mt-2" min="1" max="100">
+                            <input type='range' v-model='drawSpeed' class='custom-range mt-2' min='1' max='100'>
 
                             <label>drawing points: <input class='form-control ml-2 mt-2' v-model='countDrawingPoints'/></label>
-                            <input type="range" v-model='countDrawingPoints' class="custom-range mt-2" min="1" max="5">
-
+                            <input type='range' v-model='countDrawingPoints' class='custom-range mt-2' min='1' max='5'>
+                            
                             <label>pixel size: <input class='form-control ml-2 mt-2' v-model='pixelSize'/></label>
-                            <input type="range" v-model='pixelSize' class="custom-range mt-2" min="1" max="30">
+                            <input type='range' v-model='pixelSize' class='custom-range mt-2' min='1' max='30'>
 
-                            <label>oldPoint red: <input class='form-control ml-2 mt-2' v-model='oldPoint.r'/></label>
-                            <input type="range" v-model='oldPoint.r' class="custom-range mt-2" min="0" max="255">
-                            <label>oldPoint blue: <input class='form-control ml-2 mt-2' v-model='oldPoint.g'/></label>
-                            <input type="range" v-model='oldPoint.g' class="custom-range mt-2" min="0" max="255">
-                            <label>oldPoint green: <input class='form-control ml-2 mt-2' v-model='oldPoint.b'/></label>
-                            <input type="range" v-model='oldPoint.b' class="custom-range mt-2" min="0" max="255">
-                            <canvas id='oldColor' width='50' height='50' style='border:2px solid black'/>
-
-                            <b-form-select v-model='selectedPoint'>
-	                            <option v-for='(drawingPoint, index) in drawingPoints' :value='drawingPoints.indexOf(drawingPoint)'>
-	                              point: {{index+1}}
-	                            </option>
-                            </b-form-select>
-                            
-                            <label>newPointnewRed: <input class='form-control ml-2 mt-2' v-model='newRed'/></label>
-                            <input type="range"
-                            	@change='changeDrawingPointColor(selectedPoint)'
-                            	v-model='newRed' 
-                            	class="custom-range mt-2" 
-                            	min="0" max="255">
-                            
-                            <label>newPointnewBlue: <input class='form-control ml-2 mt-2' v-model='newGreen'/></label>
-                            <input type="range" 
-                            	@change='changeDrawingPointColor(selectedPoint)'
-                            	v-model='newGreen' 
-                            	class="custom-range mt-2" 
-                            	min="0" max="255">
-                            
-                            <label>newPointnewGreen: <input class='form-control ml-2 mt-2' v-model='newBlue'/></label>
-                            <input type="range" 
-                            	@change='changeDrawingPointColor(selectedPoint)'
-                            	v-model='newBlue' 
-                            	class="custom-range mt-2" 
-                            	min="0" max="255">
-                            
-                            <canvas id='newColor' width='50' height='50' style='border:2px solid black'/>
-
+                            <b-tabs class='mt-3'>
+	                            <b-tab title='new point'>
+		                            <div class='row mt-3 ml-1'>
+			                            <div class='mx-2 smallColorBox' :style='{ background: convertToRgb(drawingPoints[0].color) } '></div>
+			                            <div class='mx-2 smallColorBox' :style='{ background: convertToRgb(drawingPoints[1].color) } '></div>
+			                            <div class='mx-2 smallColorBox' :style='{ background: convertToRgb(drawingPoints[2].color) } '></div>
+			                            <div class='mx-2 smallColorBox' :style='{ background: convertToRgb(drawingPoints[3].color) } '></div>
+			                            <div class='mx-2 smallColorBox' :style='{ background: convertToRgb(drawingPoints[4].color) } '></div>
+			                            <button class='btn btn-primary ml-2' @click='resetNewPointColors'>reset colors</button>
+		                            </div>
+		                            <b-form-select class='my-3 w-100' v-model='selectedPoint'>
+			                            <option v-for='(drawingPoint, index) in drawingPoints' :value='drawingPoints.indexOf(drawingPoint)'>
+			                              point: {{index+1}}
+			                            </option>
+	                            	</b-form-select>
+		                            <label>newPointnewRed: <input class='form-control ml-2 mt-2' v-model='drawingPoints[selectedPoint].color.r'/></label>
+		                            <input type='range'
+		                            	v-model='drawingPoints[selectedPoint].color.r' 
+		                            	class='custom-range mt-2' 
+		                            	min='0' max='255'>
+		                            
+		                            <label>newPointnewBlue: <input class='form-control ml-2 mt-2' v-model='drawingPoints[selectedPoint].color.g'/></label>
+		                            <input type='range' 
+		                            	v-model='drawingPoints[selectedPoint].color.g' 
+		                            	class='custom-range mt-2' 
+		                            	min='0' max='255'>
+		                            
+		                            <label>newPointnewGreen: <input class='form-control ml-2 mt-2' v-model='drawingPoints[selectedPoint].color.b'/></label>
+		                            <input type='range' 
+		                            	v-model='drawingPoints[selectedPoint].color.b' 
+		                            	class='custom-range mt-2'
+		                            	min='0' max='255'>
+		                            
+		                            <div class='mx-2 mt-2 commonColorBox' style='border: 2px solid black;' :style='{ background: convertToRgb(drawingPoints[selectedPoint].color) } '></div>
+		                            	
+		                        </b-tab>
+	                            <b-tab title='old point'>
+		                            <label>oldPoint red: <input class='form-control ml-2 mt-2' v-model='oldPoint.r'/></label>
+		                            <input type="range" v-model='oldPoint.r' class='custom-range mt-2' min='0' max='255'>
+		                            
+		                            <label>oldPoint blue: <input class='form-control ml-2 mt-2' v-model='oldPoint.g'/></label>
+		                            <input type="range" v-model='oldPoint.g' class='custom-range mt-2' min='0' max='255'>
+		                            
+		                            <label>oldPoint green: <input class='form-control ml-2 mt-2' v-model='oldPoint.b'/></label>
+		                            <input type="range" v-model='oldPoint.b' class='custom-range mt-2' min='0' max='255'>
+		                            
+		                            <div class='mx-2 mt-2 commonColorBox' style='2px solid black;' :style='{ background: convertToRgb(oldPoint) } '></div>
+		                            
+			                    </b-tab>
+	                        </b-tabs>
+                            	
                         </div>
                     </div>
                 </div>
@@ -78,61 +92,36 @@ export default {
     name: 'Canv',
     data() {
         return {
-        	newRed: 255,
-        	newGreen: 0,
-        	newBlue: 0,
             points: [],
             corePoints: [],
-            oldCountDrawingPoints: 1,
+            oldCountDrawingPoints: 0,
             countDrawingPoints: 1,
             selectedPoint: 0,
             drawingPoints: [
-            	{
-            		color: { r: 255, g: 0, b: 0 },
-            		speed: 1
-                },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
             ],
             drawSpeed: 1,
             pixelSize: 20,
             drawingFunctions: [],
             startPoint: null,
             drawingFunctionIsRunning: false,
-            oldPointColor: null,
-            newPointColor: null,
             newX: 0,
             newY: 0,
             ctx: null,
             canvas: null,
-            newColorCanv: null,
-            newColorCtx: null,
-            oldColorCanv: null,
-            oldColorCtx: null,
             oldPoint: {
                     r: 0, g: 0, b: 0
             },
         }
     },
     mounted: function() {
+    	this.oldCountDrawingPoints = this.countDrawingPoints
         this.oldPointColor = this.convertToRgb(this.oldPoint)
         var canvas = document.getElementById('canv')
-        var newColorCanv = document.getElementById('newColor')
-        var oldColorCanv = document.getElementById('oldColor')
-        if (newColorCanv.getContext) {
-            this.newColorCtx = newColorCanv.getContext('2d')
-            this.newColorCanv = newColorCanv 
-            this.newColorCtx.fillStyle = this.convertToRgb(this.drawingPoints[0].color)
-            this.newColorCtx.fillRect(0, 0, this.newColorCanv.width, this.newColorCanv.height)
-        } else {
-            console.log('canvas error #newColor')
-        }
-        if (oldColorCanv.getContext) {
-            this.oldColorCtx = oldColorCanv.getContext('2d')
-            this.oldColorCanv = oldColorCanv 
-            this.oldColorCtx.fillStyle = this.oldPointColor
-            this.oldColorCtx.fillRect(0, 0, this.oldColorCanv.width, this.oldColorCanv.height)
-        } else {
-            console.log('canvas error #oldColor')
-        }
         if (canvas.getContext) {
             this.ctx = canvas.getContext('2d')
             this.canvas = canvas 
@@ -141,43 +130,6 @@ export default {
         }
     },
     watch: { 
-    	selectedPoint: function(newVal, oldVal) {
-    		this.newColorCtx.fillStyle = this.convertToRgb(this.drawingPoints[newVal].color)
-            this.newColorCtx.fillRect(0, 0, this.newColorCanv.width, this.newColorCanv.height)
-            this.newRed = this.drawingPoints[newVal].color.r
-            this.newGreen = this.drawingPoints[newVal].color.g
-            this.newBlue = this.drawingPoints[newVal].color.b
-        },
-        newRed: function(newVal, oldVal) {
-        	this.changeNewPointColor()
-        	this.drawingPoints[this.selectedPoint].color.r = newVal
-        },
-        newGreen: function(newVal, oldVal) {
-        	this.changeNewPointColor()
-        	this.drawingPoints[this.selectedPoint].color.g = newVal
-        },
-        newBlue: function(newVal, oldVal) {
-        	this.changeNewPointColor()
-        	this.drawingPoints[this.selectedPoint].color.b = newVal
-        },
-        'oldPoint.r': function() {
-            this.changeOldPointColor()
-            if(this.drawingFunctionIsRunning) { 
-                this.restartAllDrawingFunctions()
-            }
-        },
-        'oldPoint.g': function() { 
-            this.changeOldPointColor()
-            if(this.drawingFunctionIsRunning) {
-                this.restartAllDrawingFunctions()
-            } 
-        },
-        'oldPoint.b': function() { 
-            this.changeOldPointColor()
-            if(this.drawingFunctionIsRunning) {
-                this.restartAllDrawingFunctions() 
-            }
-        },
         pixelSize: function(newVal, oldVal) {
             if(this.drawingFunctionIsRunning) {
                 if(newVal > 30) {
@@ -229,28 +181,21 @@ export default {
         }
     },
     methods: {
-    	changeDrawingPointColor(selectedPoint) {
-			if(this.drawingFunctionIsRunning) {
-                this.restartAllDrawingFunctions() 
-            }
-    		this.newColorCtx.fillStyle = this.convertToRgb(this.drawingPoints[this.selectedPoint].color)
-    		this.newColorCtx.fillRect(0, 0, this.newColorCanv.width, this.newColorCanv.height)
-    	},
-    	changeNewPointColor() {
-            this.newColorCtx.fillStyle = this.convertToRgb(this.drawingPoints[this.selectedPoint].color)
-            this.newColorCtx.fillRect(0, 0, this.newColorCanv.width, this.newColorCanv.height)
-    	},
-    	changeOldPointColor() {
-    		this.oldPointColor = this.convertToRgb(this.oldPoint)
-            this.oldColorCtx.fillStyle = this.oldPointColor
-            this.oldColorCtx.fillRect(0, 0, this.oldColorCanv.width, this.oldColorCanv.height)
+    	resetNewPointColors() {
+    		this.drawingPoints = [
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            	{ color: { r: 255, g: 0, b: 0 }, speed: 1 },
+            ]
     	},
         convertToRgb(pointColorObject) {
             return 'rgb(' + pointColorObject.r + ',' + pointColorObject.g + ',' + pointColorObject.b + ')'
         },
         recolorOldPoints() {
             for(let i=0; i<this.oldCountDrawingPoints+1; i++) {
-                let oldPointIndex = this.points.length - this.countDrawingPoints - i - 1
+                let oldPointIndex = this.points.length - this.countDrawingPoints - i
                 if(oldPointIndex > -1) {
                     let oldPoint = this.points[oldPointIndex]
                     let pointSize = this.points[oldPointIndex].pointSize
@@ -270,7 +215,10 @@ export default {
                 this.drawingFunctions[i] = newDrawingFunction
             }
         },
-        drawOnePointFunction(i) {
+        drawOnePointFunction(i) { 
+        	if(this.points.length-this.countDrawingPoints >= 0) {
+        		this.recolorOldPoints()
+        	}
             var random = Math.floor(Math.random() * (this.corePoints.length))
             this.newX = (this.corePoints[random].x + this.newX) / 2
             this.newY = (this.corePoints[random].y + this.newY) / 2
@@ -284,9 +232,6 @@ export default {
             this.points.push(newPoint)
             this.ctx.fillStyle = this.convertToRgb(this.drawingPoints[i].color)
             this.ctx.fillRect(this.newX, this.newY, this.pixelSize, this.pixelSize)
-            if(this.points.length-this.drawingPoints.length > 0) {
-               this.recolorOldPoints()
-            }
             if(this.points.length > 998) {
                 this.points.shift()
             }
@@ -295,9 +240,6 @@ export default {
             if(this.corePoints.length > 1) {
                 this.newX = this.startPoint.x
                 this.newY = this.startPoint.y
-            }
-            if(this.points.length > 1) {
-
             }
             if(this.corePoints.length > 1 && !this.drawingFunctionIsRunning) {
                 this.drawingFunctions = []
@@ -350,5 +292,12 @@ export default {
 }
 </script>
 <style>
-
+.commonColorBox {
+	width: 50px; 
+	height: 50px; 
+}
+.smallColorBox {
+	width: 20px; 
+	height: 20px; 
+}
 </style>
