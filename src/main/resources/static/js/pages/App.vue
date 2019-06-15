@@ -8,16 +8,26 @@
             </div>
         </nav>
         <div class='row mt-4 ml-1'>
-            <div class='col'>
-                <canvas id='canv' width='1000' height='1000' style='border: 2px solid black' @click='addPoint'></canvas>
+            <div class='col-8'>
+                <canvas id='canv' width='1000' height='1000' style='border: 2px solid black' @click='addCorePoint'></canvas>
             </div>
-            <div class='col'>
-                <div class='card'>
+            <div class='col-4'>
+                <div class='card mb-2'>
                     <div class='card-body'>
-                        <button class='btn btn-success' @keyup.enter='startDraw' @click='startDraw'>start</button>
-                        <button class='btn btn-primary' @click='stopDraw'>stop</button>
-                        <button class='btn btn-primary' @click='drawOnePointFunction(0)'>draw one point</button>
-                        <button class='btn btn-danger' @click='resetCanvas'>reset</button>
+                        <button class='btn btn-success'
+                                data-toggle="tooltip" data-placement="top" title="make two point on canvas to start drawing"
+                                :disabled='drawingFunctionIsRunning || corePoints.length < 2'
+                                @keyup.enter='startDraw'
+                                @click='startDraw'>
+                            <div v-if='corePoints.length < 2'>no points</div>
+                            <div v-else-if='drawingFunctionIsRunning'>running</div>
+                            <div v-else-if='allPoints[0].length > 0 && !drawingFunctionIsRunning'>continue</div>
+                            <div v-else>start</div>
+                        </button>
+                        <button class='btn btn-primary' :disabled='!drawingFunctionIsRunning' @click='stopDraw'>stop</button>
+                        <button class='btn btn-primary' :disabled='corePoints.length < 2' @click='drawOnePointFunction(0)'>draw one</button>
+                        <button class='btn btn-danger' :disabled='corePoints.length == 0' @click='resetCanvas'>reset</button>
+                        <button class='btn btn-primary mt-2' :disabled='allPoints[0].length == 0' @click='cleanOldPoints'>clean old points</button>
 
                         <div class='mt-4 form-inline'>
 
@@ -131,44 +141,56 @@
 
                                 </b-tab>
 
-<!--                                <b-tab title='core point'>-->
-<!--                                    <div class='row mt-3 ml-1'>-->
-<!--                                        <div v-for='(oldPoint, index) in oldPoints.slice(0,countDrawingPoints)'>-->
-<!--                                            <div class='mx-2 smallColorBox'-->
-<!--                                                 :style='{ background: convertToRgb(oldPoint.color) }'-->
-<!--                                                 :id='"oldPoint" + index'-->
-<!--                                                 @click='selectedOldPoint = index'-->
-<!--                                                 @mouseover='addColorBoxStyle("oldPoint" + index)'-->
-<!--                                                 @mouseout='removeColorBoxStyle("oldPoint" + index)'>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                        <button class='btn btn-primary ml-2' @click='resetOldPointColors'>reset colors-->
-<!--                                        </button>-->
-<!--                                    </div>-->
-<!--                                    <b-form-select class='my-3 w-100' v-model='selectedOldPoint'>-->
-<!--                                        <option v-for='(oldPoint, index) in oldPoints.slice(0,countDrawingPoints)'-->
-<!--                                                :value='oldPoints.indexOf(oldPoint)'>-->
-<!--                                            old point: {{index+1}}-->
-<!--                                        </option>-->
-<!--                                    </b-form-select>-->
-<!--                                    <label>old Point red:-->
-<!--                                        <input class='form-control ml-2 mt-2' v-model='oldPoints[selectedOldPoint].color.r'/>-->
-<!--                                    </label>-->
-<!--                                    <input type="range" v-model='oldPoints[selectedOldPoint].color.r' class='custom-range mt-2' min='0' max='255'>-->
+                                <b-tab title='core point'>
+                                    <div v-if='corePoints.length > 0'>
+                                        <div class='row mt-3 ml-1'>
+                                            <div v-for='(corePoint, index) in corePoints'>
+                                                <div class='mx-2 my-1 smallColorBox'
+                                                     :style='{ background: convertToRgb(corePoint.color) }'
+                                                     :id='"corePoint" + index'
+                                                     @click='selectedCorePoint = index'
+                                                     @mouseover='addColorBoxStyle("corePoint" + index)'
+                                                     @mouseout='removeColorBoxStyle("corePoint" + index)'>
+                                                </div>
+                                            </div>
+                                            <button class='btn btn-primary ml-2 mt-1' @click='resetCorePointColors'>
+                                                reset colors
+                                            </button>
+                                        </div>
+                                        <b-form-select class='my-3 w-100' v-model='selectedCorePoint'>
+                                            <option v-for='(corePoint, index) in corePoints'
+                                                    :value='corePoints.indexOf(corePoint)'>
+                                                core point: {{index+1}}
+                                            </option>
+                                        </b-form-select>
 
-<!--                                    <label>old Point blue:-->
-<!--                                        <input class='form-control ml-2 mt-2' v-model='oldPoints[selectedOldPoint].color.g'/>-->
-<!--                                    </label>-->
-<!--                                    <input type="range" v-model='oldPoints[selectedOldPoint].color.g' class='custom-range mt-2' min='0' max='255'>-->
+                                        <button v-if='corePoints.length > 2 || !drawingFunctionIsRunning' class='btn btn-danger' @click='deleteCurrentCorePoint'>
+                                            delete this point
+                                        </button>
 
-<!--                                    <label>old Point green:-->
-<!--                                        <input class='form-control ml-2 mt-2' v-model='oldPoints[selectedOldPoint].color.b'/>-->
-<!--                                    </label>-->
-<!--                                    <input type="range" v-model='oldPoints[selectedOldPoint].color.b' class='custom-range mt-2' min='0' max='255'>-->
+                                        <label>core Point red:
+                                            <input class='form-control ml-2 mt-2' v-model='corePoints[selectedCorePoint].color.r'/>
+                                        </label>
+                                        <input type="range" v-model='corePoints[selectedCorePoint].color.r' class='custom-range mt-2' min='0' max='255'>
 
-<!--                                    <div class='mx-2 mt-2 commonColorBox' style='border: 2px solid black;' :style='{ background: convertToRgb(oldPoints[selectedOldPoint].color) } '></div>-->
+                                        <label>core Point blue:
+                                            <input class='form-control ml-2 mt-2' v-model='corePoints[selectedCorePoint].color.g'/>
+                                        </label>
+                                        <input type="range" v-model='corePoints[selectedCorePoint].color.g' class='custom-range mt-2' min='0' max='255'>
 
-<!--                                </b-tab>-->
+                                        <label>core Point green:
+                                            <input class='form-control ml-2 mt-2' v-model='corePoints[selectedCorePoint].color.b'/>
+                                        </label>
+                                        <input type="range" v-model='corePoints[selectedCorePoint].color.b' class='custom-range mt-2' min='0' max='255'>
+
+                                        <div class='mx-2 mt-2 commonColorBox' style='border: 2px solid black;' :style='{ background: convertToRgb(corePoints[selectedCorePoint].color) } '></div>
+
+                                    </div>
+                                    <div class='mx-auto mt-2' v-else>
+                                        no core points yet
+                                    </div>
+
+                                </b-tab>
                             </b-tabs>
 
                         </div>
@@ -187,18 +209,23 @@
                 countDrawingPoints: 1,
                 selectedNewPoint: 0,
                 selectedOldPoint: 0,
+                selectedCorePoint: 0,
                 allPoints: [ [] ],
                 corePoints: [],
                 drawingPoints: [
-                    {color: {r: 255, g: 0, b: 0}, customSpeed: false, speed: 1}
+                    { color: {r: 255, g: 0, b: 0}, customSpeed: false, speed: 1 }
                 ],
                 oldPoints: [
-                    {color: {r: 0, g: 0, b: 0}},
+                    { color: {r: 0, g: 0, b: 0} },
                 ],
                 drawSpeed: 1,
                 pointSize: 20,
+                corePointSize: 15,
                 drawingFunctions: [],
-                startPoint: null,
+                startPoint: {
+                    x: null,
+                    y: null,
+                },
                 drawingFunctionIsRunning: false,
                 newX: 0,
                 newY: 0,
@@ -216,6 +243,18 @@
             }
         },
         watch: {
+            corePoints: {
+                handler: function () {
+                    if(this.corePoints.length > 0) {
+                        let x = this.corePoints[this.selectedCorePoint].x
+                        let y = this.corePoints[this.selectedCorePoint].y
+                        let color = this.corePoints[this.selectedCorePoint].color
+                        this.canvasCtx.fillStyle = this.convertToRgb(color)
+                        this.canvasCtx.fillRect(x, y, this.corePointSize, this.corePointSize)
+                    }
+                },
+                deep: true
+            },
             drawingPoints: {
                 handler: function () {
                     if (this.drawingFunctionIsRunning) {
@@ -319,15 +358,34 @@
                     this.oldPoints[i] = { color: {r: 0, g: 0, b: 0} }
                 }
             },
+            resetCorePointColors() {
+                for(let i = 0; i < this.corePoints.length; i++) {
+                    this.corePoints[i].color = {r: 0, g: 0, b: 255}
+                    this.corePoints[i].size = this.corePointSize
+                }
+            },
             resetAllSettings() {
+                this.resetCorePointColors()
                 this.resetOldPointColors()
                 this.resetNewPointColors()
                 this.drawSpeed = 1
                 this.pointSize = 20
                 this.countDrawingPoints = 1
+                this.corePointSize = 15
             },
             convertToRgb(pointColorObject) {
                 return 'rgb(' + pointColorObject.r + ',' + pointColorObject.g + ',' + pointColorObject.b + ')'
+            },
+            cleanOldPoints() {
+                this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+                this.allPoints = [ [] ]
+                for(let i = 0; i < this.corePoints.length; i++) {
+                    let x = this.corePoints[i].x
+                    let y = this.corePoints[i].y
+                    let color = this.convertToRgb(this.corePoints[i].color)
+                    this.canvasCtx.fillStyle = color
+                    this.canvasCtx.fillRect(x, y, this.corePointSize, this.corePointSize)
+                }
             },
             recolorOldPoint(i) {
                 let oldPointIndex = this.allPoints[i].length - 1
@@ -339,6 +397,20 @@
                     this.canvasCtx.fillRect(oldPoint.x, oldPoint.y, oldPointSize, oldPointSize)
                     this.allPoints[i][oldPointIndex].pointColor = this.convertToRgb(oldPointColor)
                 }
+            },
+            deleteCurrentCorePoint() {
+                let x = this.corePoints[this.selectedCorePoint].x
+                let y = this.corePoints[this.selectedCorePoint].y
+                // let imgData = this.canvasCtx.getImageData(x-1, y-1, 1, 1);
+                let color
+                if(this.drawingFunctionIsRunning) {
+                    color = this.convertToRgb(this.oldPoints[0].color)
+                } else {
+                    color = 'white'
+                }
+                this.canvasCtx.fillStyle = color
+                this.canvasCtx.fillRect(x, y, this.corePointSize, this.corePointSize)
+                this.corePoints.splice(this.selectedCorePoint, 1)
             },
             drawOnePointFunction(i) {
                 if (this.allPoints[i].length - 1 >= 0) {
@@ -376,29 +448,39 @@
                 this.drawingFunctionIsRunning = false
             },
             resetCanvas() {
-                this.stopAllDrawingFunctions()
-                this.drawingFunctionIsRunning = false
+                this.stopDraw()
                 this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
                 this.corePoints = []
                 this.allPoints = [ [] ]
                 this.drawingFunctions = []
-                this.startPoint = null
+                this.startPoint = {x: null, y: null}
             },
-            addPoint(event) {
-                let offsetX = event.offsetX;
-                let offsetY = event.offsetY;
-                if (this.startPoint != null) {
+            checkNewCorePointOverlap(x, y) {
+                let overlap = false
+                for(let i = 0; i < this.corePoints.length; i++) {
+                    if(this.corePoints[i].x == x && this.corePoints[i].y == y) {
+                        overlap = true
+                    }
+                }
+                return overlap
+            },
+            addCorePoint(event) {
+                let offsetX = event.offsetX
+                let offsetY = event.offsetY
+                if (this.startPoint.x == null && this.startPoint.y == null) {
+                    this.startPoint.x = offsetX
+                    this.startPoint.y = offsetY
+                }
+                if(!this.checkNewCorePointOverlap(offsetX, offsetY)) {
                     let newCorePoint = {
                         x: offsetX,
-                        y: offsetY
-                    };
+                        y: offsetY,
+                        color: {r: 0, g: 0, b: 255},
+                        size: this.corePointSize,
+                    }
                     this.corePoints.push(newCorePoint)
-                    this.canvasCtx.fillStyle = "orange"
-                    this.canvasCtx.fillRect(offsetX, offsetY, 15, 15)
-                } else {
-                    this.startPoint = {x: offsetX, y: offsetY}
-                    this.canvasCtx.fillStyle = "green"
-                    this.canvasCtx.fillRect(offsetX, offsetY, 15, 15)
+                    this.canvasCtx.fillStyle = this.convertToRgb(newCorePoint.color)
+                    this.canvasCtx.fillRect(offsetX, offsetY, newCorePoint.size, newCorePoint.size)
                 }
             }
         }
