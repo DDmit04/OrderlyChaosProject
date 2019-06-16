@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import '@babel/polyfill'
 import App from 'pages/app.vue'
-// import store from 'store/store'
+import store from 'store/store'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -14,5 +14,6 @@ Vue.config.productionTip = false
 
 new Vue ({
     el: '#app',
+    store,
     render: a => a(App)
 })
