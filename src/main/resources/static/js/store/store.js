@@ -22,6 +22,7 @@ export default new Vuex.Store({
         drawSpeed: 1,
         pointSize: 20,
         corePointSize: 15,
+        drawingFunctionIsRunning: false,
     },
     getters: {
         drawingPoints: state => state.drawingPoints,
@@ -35,6 +36,8 @@ export default new Vuex.Store({
         getDrawSpeed: state => state.drawSpeed,
         allPoints: state => state.allPoints,
         corePointSize: state => state.corePointSize,
+        objectToRgbFunction: state => pointColorObject => {
+            return 'rgb(' + pointColorObject.r + ',' + pointColorObject.g + ',' + pointColorObject.b + ')'        }
     },
     mutations: {
         updateDrawSpeed(state, newVal) {
@@ -139,7 +142,20 @@ export default new Vuex.Store({
             state.pointSize = 20
             state.getCountDrawingPoints = 1
             state.corePointSize = 15
-        }
+        },
+        deleteCurrentCorePoint(state) {
+            let x = state.corePoints[state.selectedCorePoint].x
+            let y = state.corePoints[state.selectedCorePoint].y
+            let color
+            if(state.drawingFunctionIsRunning) {
+                color = getters.objectToRgbFunction(state.oldPoints[0].color)
+            } else {
+                color = 'white'
+            }
+            state.canvasCtx.fillStyle = color
+            state.canvasCtx.fillRect(x, y, state.corePointSize, state.corePointSize)
+            state.corePoints.splice(state.selectedCorePoint, 1)
+        },
     },
     actions: {
         resetAllSettings({commit}) {

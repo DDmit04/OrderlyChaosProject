@@ -68,14 +68,6 @@
                 },
                 set() {
                     this.updateColors({pointArrayType: this.point, updatedPoint: this.pointArray[this.selectedPoint]})
-                    // handler: function () {
-                    //     this.updateColors({
-                    //         pointArrayType: this.point,
-                    //         index: this.selectedPoint,
-                    //         colors: this.pointArray[this.selectedPoint]
-                    //     })
-                    // },
-                    // deep: true
                 }
             },
             selectedPoint: {

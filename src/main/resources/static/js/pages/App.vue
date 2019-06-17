@@ -37,20 +37,20 @@
                                 <b-tab title='new point'>
                                     <pointSelector :point='"new"'
                                                    :objectToRgbFunction='objectToRgbFunction'/>
-                                    <pointController :point='"new"'
+                                    <pointColors :point='"new"'
                                                      :objectToRgbFunction='objectToRgbFunction'/>
                                 </b-tab>
                                 <b-tab title='old point'>
                                     <pointSelector :point='"old"'
                                                    :objectToRgbFunction='objectToRgbFunction'/>
-                                    <pointController :point='"old"'
+                                    <pointColors :point='"old"'
                                                      :objectToRgbFunction='objectToRgbFunction'/>
                                 </b-tab>
                                 <b-tab title='core point'>
                                     <div v-if='corePoints.length > 0'>
                                         <pointSelector :point='"core"'
                                                        :objectToRgbFunction='objectToRgbFunction'/>
-                                        <pointController :point="'core'"
+                                        <pointColors :point="'core'"
                                                          :objectToRgbFunction='objectToRgbFunction'/>
                                     </div>
                                     <div class='mx-auto mt-2' v-else>
@@ -69,14 +69,14 @@
 
 <script>
     import {mapGetters} from 'vuex'
-    import pointController from 'components/colorControls.vue'
-    import pointSelector from 'components/colorSelectior.vue'
+    import pointColors from 'static/js/components/pointColors.vue'
+    import pointSelector from 'static/js/components/pointSelector.vue'
     import coreControls from 'components/coreControls.vue'
 
     export default {
         name: 'Canv',
         components: {
-            pointController,
+            pointColors,
             pointSelector,
             coreControls
         },
@@ -121,62 +121,6 @@
                 },
                 deep: true
             },
-            drawingPoints: {
-                handler: function () {
-                    if (this.drawingFunctionIsRunning) {
-                        this.restartAllDrawingFunctions()
-                    }
-                },
-                deep: true
-            },
-            pointSize: function (newVal) {
-                if (this.drawingFunctionIsRunning) {
-                    if (newVal > 30) {
-                        this.pointSize = 30
-                    }
-                    if (newVal <= 0) {
-                        this.pointSize = 1
-                    }
-                    this.restartAllDrawingFunctions()
-                }
-            },
-            getCountDrawingPoints: function (newVal, oldVal) {
-                if (newVal > oldVal && this.drawingPoints.length < newVal && this.oldPoints.length < newVal) {
-                    for (let i = 0; i < newVal - oldVal; i++) {
-                        this.drawingPoints.push({
-                            color: { r: 255, g: 0, b: 0 },
-                            customSpeed: false,
-                            speed: 1
-                        })
-                        this.allPoints.push( [] )
-                        this.oldPoints.push( {color: {r: 0, g: 0, b: 0} } )
-                    }
-                }
-                if (this.drawingFunctionIsRunning) {
-                    if (newVal > 5) {
-                        this.drawingPoints.lenght = 5
-                    }
-                    if (newVal <= 0) {
-                        this.drawingPoints.lenght = 1
-                    }
-                    for(let i = 0; i < oldVal; i++) {
-                        this.recolorOldPoint(i)
-                    }
-                    this.restartAllDrawingFunctions()
-                }
-            },
-            drawSpeed: function (newVal) {
-                if (this.drawingFunctionIsRunning) {
-                    if (newVal > 100) {
-                        this.drawSpeed = 100
-                    }
-                    if (newVal <= 0) {
-                        this.drawSpeed = 1
-                    }
-                    this.drawSpeed = newVal
-                    this.restartAllDrawingFunctions()
-                }
-            }
         },
         methods: {
             stopAllDrawingFunctions() {
@@ -226,19 +170,6 @@
                     this.canvasCtx.fillRect(oldPoint.x, oldPoint.y, oldPointSize, oldPointSize)
                     this.allPoints[i][oldPointIndex].pointColor = this.objectToRgbFunction(oldPointColor)
                 }
-            },
-            deleteCurrentCorePoint() {
-                let x = this.corePoints[this.selectedCorePoint].x
-                let y = this.corePoints[this.selectedCorePoint].y
-                let color
-                if(this.drawingFunctionIsRunning) {
-                    color = this.objectToRgbFunction(this.oldPoints[0].color)
-                } else {
-                    color = 'white'
-                }
-                this.canvasCtx.fillStyle = color
-                this.canvasCtx.fillRect(x, y, this.corePointSize, this.corePointSize)
-                this.corePoints.splice(this.selectedCorePoint, 1)
             },
             drawOnePointFunction(i) {
                 if (this.allPoints[i].length - 1 >= 0) {
