@@ -52,6 +52,17 @@
     import {mapMutations} from 'vuex'
     export default {
         props: ['point', 'objectToRgbFunction'],
+        watch: {
+            pointArray: {
+                handler(){
+                    this.updateColors({
+                        pointArrayType: this.point,
+                        updatedPoint: this.pointArray[this.selectedPoint]
+                    })
+                },
+                deep: true
+            }
+        },
         computed: {
             pointArray: {
                 get() {
@@ -65,9 +76,6 @@
                         console.error('unknown point type ' +
                             '[' + this.point + ' ' + typeof(this.point) + ']')
                     }
-                },
-                set() {
-                    this.updateColors({pointArrayType: this.point, updatedPoint: this.pointArray[this.selectedPoint]})
                 }
             },
             selectedPoint: {

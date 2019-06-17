@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import {objectToRgbFunction} from 'helpers/helpFunctions.js'
 
 Vue.use(Vuex)
 
@@ -19,10 +20,17 @@ export default new Vuex.Store({
         corePoints: [],
         allPoints: [ [] ],
         selectedCorePoint: 0,
+        startPoint: {
+            x: null,
+            y: null,
+        },
         drawSpeed: 1,
         pointSize: 20,
         corePointSize: 15,
         drawingFunctionIsRunning: false,
+        canvas: null,
+        canvasCtx: null,
+        drawingFunctions: [],
     },
     getters: {
         drawingPoints: state => state.drawingPoints,
@@ -36,25 +44,94 @@ export default new Vuex.Store({
         getDrawSpeed: state => state.drawSpeed,
         allPoints: state => state.allPoints,
         corePointSize: state => state.corePointSize,
-        objectToRgbFunction: state => pointColorObject => {
-            return 'rgb(' + pointColorObject.r + ',' + pointColorObject.g + ',' + pointColorObject.b + ')'        }
+        oldCountDrawingPoints: state => state.oldCountDrawingPoints,
+        drawingFunctionIsRunning: state => state.drawingFunctionIsRunning,
+        canvas: state => state.canvas,
+        canvasCtx: state => state.canvasCtx,
+        drawingFunctions: state => state.drawingFunctions,
+        startPoint: state => state.startPoint
     },
     mutations: {
+        resetCanvas(state) {
+            state.canvasCtx.clearRect(0, 0, state.canvas.width, state.canvas.height)
+            state.corePoints = []
+            state.allPoints = [  ]
+            for(let i = 0; i < state.countDrawingPoints; i++) {
+                state.allPoints.push([])
+            }
+            state.drawingFunctions = []
+            state.startPoint = {x: null, y: null}
+        },
+        drawPoint(state, payload) {
+            let x = payload.x
+            let y = payload.y
+            let pointSize = payload.pointSize
+            let color = payload.color
+            state.canvasCtx.fillStyle = color
+            state.canvasCtx.fillRect(x, y, pointSize, pointSize)
+        },
+        pushNewPoint(state, payload) {
+          let index = payload.index
+          let point = payload.point
+          state.allPoints[index].push(point)
+        },
+        cleanOldPoints(state) {
+            state.allPoints = [ [] ]
+        },
+        recolorOldPointMutation(state, payload) {
+            let i = payload.i
+            let j = payload.j
+            let color = payload.color
+            state.allPoints[i][j].color = color
+        },
+        updateStartPoint(state, newPoint){
+            state.startPoint = newPoint
+        },
+        stopDrawingFunctions(state) {
+            state.drawingFunctions = []
+            state.drawingFunctionIsRunning = false
+        },
+        runDrawingFunction(state, newFunction) {
+            state.drawingFunctions.push(newFunction)
+            state.drawingFunctionIsRunning = true
+        },
+        addCorePoint(state, payload) {
+            let offsetX = payload.x
+            let offsetY = payload.y
+            if (state.startPoint.x == null && state.startPoint.y == null) {
+                state.startPoint.x = offsetX
+                state.startPoint.y = offsetY
+            }
+            let newCorePoint = {
+                x: offsetX,
+                y: offsetY,
+                color: {r: 0, g: 0, b: 255},
+                size: state.corePointSize,
+            }
+            state.corePoints.push(newCorePoint)
+            state.canvasCtx.fillStyle = objectToRgbFunction(newCorePoint.color)
+            state.canvasCtx.fillRect(offsetX, offsetY, newCorePoint.size, newCorePoint.size)
+        },
         updateDrawSpeed(state, newVal) {
             if (newVal > 100) {
-                state.pointSize = 5
+                state.drawSpeed = 100
             }
-            else if (newVal <= 0) {
-                state.pointSize = 1
-            }
-            if(typeof(newVal) != "number") {
-                console.error('updateDrawSpeed error point speed < 100 and >= 0 ' +
-                                '[' +  newVal + ' ' + typeof(newVal) +']')
+            else if (newVal <= 0 || newVal == "") {
+                state.drawSpeed = 1
+            } else {
+                state.drawSpeed = newVal
             }
         },
         updateCountDrawingPoints (state, newValue) {
-            state.oldCountDrawingPoints = state.countDrawingPoints
-            state.countDrawingPoints = newValue
+            if (newValue > 5) {
+                state.countDrawingPoints = 5
+            }
+            else if (newValue <= 0 || newValue == '') {
+                state.countDrawingPoints = 1
+            } else {
+                state.oldCountDrawingPoints = state.countDrawingPoints
+                state.countDrawingPoints = newValue
+            }
             let newVal = state.countDrawingPoints
             let oldVal = state.oldCountDrawingPoints
             if (newVal > oldVal && state.drawingPoints.length < newVal && state.oldPoints.length < newVal) {
@@ -69,14 +146,6 @@ export default new Vuex.Store({
                 }
             }
             // if (this.drawingFunctionIsRunning) {
-                if (newVal > 5) {
-                    state.drawingPoints.lenght = 5
-                    state.countDrawingPoints = 5
-                }
-                else if (newVal <= 0) {
-                    state.drawingPoints.lenght = 1
-                    state.countDrawingPoints = 1
-                }
             //     for(let i = 0; i < oldVal; i++) {
             //         this.recolorOldPoint(i)
             //     }
@@ -87,12 +156,10 @@ export default new Vuex.Store({
             if (newVal > 30) {
                 state.pointSize = 30
             }
-            else if (newVal <= 0) {
+            else if (newVal <= 0 || newVal == '') {
                 state.pointSize = 1
-            }
-            if(typeof(newVal) != "number") {
-                console.error('updatePointSize error point size < 30 and >= 0' +
-                                '[' +  newVal + ' ' + typeof(newVal) +']')
+            } else {
+                state.pointSize = newVal
             }
         },
         updateColors(state, payload) {
@@ -119,22 +186,19 @@ export default new Vuex.Store({
         },
         resetNewPointColors(state) {
             for(let i = 0; i < state.drawingPoints.length; i++) {
-                state.drawingPoints[i] = {
-                    color: {r: 255, g: 0, b: 0},
-                    customSpeed: false,
-                    speed: 1
-                }
+                state.drawingPoints[i].color = {r: 255, g: 0, b: 0}
+                state.drawingPoints[i].customSpeed = false
+                state.drawingPoints[i].speed = 1
             }
         },
         resetOldPointColors(state) {
             for(let i = 0; i < state.oldPoints.length; i++) {
-                state.oldPoints[i] = { color: {r: 0, g: 0, b: 0} }
+                state.oldPoints[i].color = {r: 0, g: 0, b: 0}
             }
         },
         resetCorePointColors(state) {
             for(let i = 0; i < state.corePoints.length; i++) {
                 state.corePoints[i].color = {r: 0, g: 0, b: 255}
-                state.corePoints[i].size = state.corePointSize
             }
         },
         resetCoreSettings(state) {
@@ -148,7 +212,7 @@ export default new Vuex.Store({
             let y = state.corePoints[state.selectedCorePoint].y
             let color
             if(state.drawingFunctionIsRunning) {
-                color = getters.objectToRgbFunction(state.oldPoints[0].color)
+                color = objectToRgbFunction(state.oldPoints[0].color)
             } else {
                 color = 'white'
             }
@@ -156,12 +220,29 @@ export default new Vuex.Store({
             state.canvasCtx.fillRect(x, y, state.corePointSize, state.corePointSize)
             state.corePoints.splice(state.selectedCorePoint, 1)
         },
+        initCanvas(state, canvas) {
+            state.canvas = canvas
+            state.canvasCtx = state.canvas.getContext('2d')
+        }
     },
     actions: {
         resetAllSettings({commit}) {
             commit('resetCorePointColors')
-            commit('resetCorePointColors')
+            commit('resetNewPointColors')
             commit('resetOldPointColors')
         },
+        addCorePointAction({commit, state}, payload) {
+            let offsetX = payload.x
+            let offsetY = payload.y
+            let overlap = false
+            for(let i = 0; i < state.corePoints.length; i++) {
+                if(state.corePoints[i].x == offsetX && state.corePoints[i].y == offsetY) {
+                    overlap = true
+                }
+            }
+            if(!overlap) {
+                commit('addCorePoint', {x: offsetX, y: offsetY})
+            }
+        }
     }
 })

@@ -42,14 +42,14 @@
                     if(this.point == 'new') {
                         return this.resetNewPointColors
                     } else if (this.point == 'old') {
-                        return this.resetNewPointColors
+                        return this.resetOldPointColors
                     } else if (this.point == 'core') {
                         return this.resetCorePointColors
                     } else {
                         console.error('unknown point type [new, old, core] ' +
                             '[' + this.point + ' ' + typeof(this.point) + ']')
                     }
-                }
+                },
             },
             pointArray: {
                 get() {
@@ -58,7 +58,7 @@
                     } else if (this.point == 'old') {
                         return this.$store.state.oldPoints.slice(0, this.countDrawingPoints)
                     } else if (this.point == 'core') {
-                        return this.$store.state.corePoints.slice(0, this.countDrawingPoints)
+                        return this.$store.state.corePoints
                     } else {
                         console.error('unknown point type ' +
                             '[' + this.point + ' ' + typeof(this.point) + ']')
@@ -79,7 +79,10 @@
                     }
                 },
                 set(newVal) {
-                    this.updateColorSelector({selectedPoint: newVal, pointArrayType: this.point})
+                    this.updateColorSelector({
+                        selectedPoint: newVal,
+                        pointArrayType: this.point
+                    })
                 }
             }
         },
@@ -95,6 +98,7 @@
                 let colorBox = document.getElementById(id)
                 colorBox.style.outline = ''
             },
+
 
         }
     }
