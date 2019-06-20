@@ -4,26 +4,26 @@
             <div v-for='(somePoint, index) in pointArray'>
                 <div class='mx-2 smallColorBox'
                      :style='{ background: objectToRgbFunction(somePoint.color) }'
-                     :id='point + index'
+                     :id='pointArrayType + index'
                      @click='selectedPoint = index'
-                     @mouseover='addColorBoxStyle(point + index)'
-                     @mouseout='removeColorBoxStyle(point + index)'>
+                     @mouseover='addColorBoxStyle(pointArrayType + index)'
+                     @mouseout='removeColorBoxStyle(pointArrayType + index)'>
                 </div>
             </div>
-            <button class='btn btn-primary ml-2' @click='resetPointColors'>
+            <button class='btn btn-primary ml-2' @click='resetPointColorsAction(pointArrayType)'>
                 reset colors
             </button>
         </div>
         <b-form-select class='my-3 w-100' v-model='selectedPoint'>
             <option v-for='(oldPoint, index) in pointArray'
-                    :value='pointArray.indexOf(oldPoint)'>
-                {{point}} point: {{index+1}}
+                    :value='index'>
+                {{pointArrayType}} point: {{index+1}}
             </option>
         </b-form-select>
 
-        <div v-if='point == "core"'>
+        <div v-if='pointArrayType == "core"'>
             <button v-if='pointArray.length > 2 || !drawingFunctionIsRunning'
-                    class='btn btn-danger' @click='deleteCurrentCorePoint'>
+                    class='btn btn-danger' @click='deleteCurrentCorePointAction'>
                 delete this point
             </button>
         </div>
@@ -31,65 +31,36 @@
 </template>
 
 <script>
-    import { mapMutations, mapState } from 'vuex'
+    import { mapMutations, mapState, mapActions} from 'vuex'
+    import {objectToRgbFunction} from 'helpers/helpFunctions.js'
+
     export default {
-        props: ['point', 'objectToRgbFunction'],
+        props: ['pointArrayType'],
         name: "colorSelector",
+        data() {
+            return {
+                objectToRgbFunction: objectToRgbFunction
+            }
+        },
         computed: {
-            ...mapState(['drawingFunctionIsRunning', 'oldPoints', 'countDrawingPoints']),
-            resetPointColors: {
-                get() {
-                    if(this.point == 'new') {
-                        return this.resetNewPointColors
-                    } else if (this.point == 'old') {
-                        return this.resetOldPointColors
-                    } else if (this.point == 'core') {
-                        return this.resetCorePointColors
-                    } else {
-                        console.error('unknown point type [new, old, core] ' +
-                            '[' + this.point + ' ' + typeof(this.point) + ']')
-                    }
-                },
-            },
+            ...mapState(['drawingFunctionIsRunning']),
             pointArray: {
-                get() {
-                    if(this.point == 'new') {
-                        return this.$store.state.drawingPoints.slice(0, this.countDrawingPoints)
-                    } else if (this.point == 'old') {
-                        return this.$store.state.oldPoints.slice(0, this.countDrawingPoints)
-                    } else if (this.point == 'core') {
-                        return this.$store.state.corePoints
-                    } else {
-                        console.error('unknown point type ' +
-                            '[' + this.point + ' ' + typeof(this.point) + ']')
-                    }
-                }
+                get() { return this.$store.getters.getPointArray(this.pointArrayType) }
             },
             selectedPoint: {
                 get() {
-                    if(this.point == 'new') {
-                        return this.$store.state.selectedNewPoint
-                    } else if (this.point == 'old') {
-                        return this.$store.state.selectedOldPoint
-                    } else if (this.point == 'core') {
-                        return this.$store.state.selectedCorePoint
-                    } else {
-                        console.error('unknown point type ' +
-                            '[' + this.point + ' ' + typeof(this.point) + ']')
-                    }
+                    return this.$store.getters.getSelectedPoint(this.pointArrayType)
                 },
                 set(newVal) {
-                    this.updateColorSelector({
+                    this.updateColorSelectorAction({
                         selectedPoint: newVal,
-                        pointArrayType: this.point
+                        pointArrayType: this.pointArrayType
                     })
                 }
             }
         },
         methods: {
-            ...mapMutations(['updateColorSelector', 'resetCorePointColors',
-                            'resetNewPointColors', 'resetOldPointColors',
-                            'deleteCurrentCorePoint']),
+            ...mapActions(['resetPointColorsAction', 'updateColorSelectorAction', 'deleteCurrentCorePointAction']),
             addColorBoxStyle(id) {
                 let colorBox = document.getElementById(id)
                 colorBox.style.outline = '2px solid rgb(0,150,255)'
@@ -105,5 +76,8 @@
 </script>
 
 <style scoped>
-
+    .smallColorBox {
+        width: 20px;
+        height: 20px;
+    }
 </style>

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {objectToRgbFunction} from 'helpers/helpFunctions.js'
+import {paintPoint, repaintDeletedCorePoint,
+        unknownPointArrayTypeError} from 'helpers/helpFunctions.js'
 
 Vue.use(Vuex)
 
@@ -20,10 +21,6 @@ export default new Vuex.Store({
         corePoints: [],
         allPoints: [ [] ],
         selectedCorePoint: 0,
-        startPoint: {
-            x: null,
-            y: null,
-        },
         drawSpeed: 1,
         pointSize: 20,
         corePointSize: 15,
@@ -33,75 +30,74 @@ export default new Vuex.Store({
         drawingFunctions: [],
     },
     getters: {
-        drawingPoints: state => state.drawingPoints,
-        oldPoints: state => state.oldPoints,
-        corePoints: state => state.corePoints,
-        selectedOldPoint: state => state.selectedOldPoint,
-        selectedNewPoint: state => state.selectedNewPoint,
-        selectedCorePoint: state => state.selectedCorePoint,
-        getCountDrawingPoints: state => state.countDrawingPoints,
-        getPointSize: state => state.pointSize,
-        getDrawSpeed: state => state.drawSpeed,
-        allPoints: state => state.allPoints,
-        corePointSize: state => state.corePointSize,
-        oldCountDrawingPoints: state => state.oldCountDrawingPoints,
-        drawingFunctionIsRunning: state => state.drawingFunctionIsRunning,
-        canvas: state => state.canvas,
-        canvasCtx: state => state.canvasCtx,
-        drawingFunctions: state => state.drawingFunctions,
-        startPoint: state => state.startPoint
+
+        getPointArray: (state) => (context) => {
+            if (context == 'new') {
+                return state.drawingPoints.slice(0, state.countDrawingPoints)
+            } else if (context == 'old') {
+                return state.oldPoints.slice(0, state.countDrawingPoints)
+            } else if (context == 'core') {
+                return state.corePoints
+            }
+        },
+        getSelectedPoint: (state) => (context) => {
+            if(context == 'new') {
+                return state.selectedNewPoint
+            } else if (context == 'old') {
+                return state.selectedOldPoint
+            } else if (context == 'core') {
+                return state.selectedCorePoint
+            }
+        },
     },
     mutations: {
-        resetCanvas(state) {
+        cleanAllPointsArrayMutation(state, drawingPointNumber) {
+            state.allPoints[drawingPointNumber].splice(0, 90)
+        },
+        resetCanvasMutation(state) {
             state.canvasCtx.clearRect(0, 0, state.canvas.width, state.canvas.height)
             state.corePoints = []
-            state.allPoints = [  ]
-            for(let i = 0; i < state.countDrawingPoints; i++) {
-                state.allPoints.push([])
-            }
+            state.allPoints = []
             state.drawingFunctions = []
             state.startPoint = {x: null, y: null}
         },
-        drawPoint(state, payload) {
-            let x = payload.x
-            let y = payload.y
-            let pointSize = payload.pointSize
-            let color = payload.color
-            state.canvasCtx.fillStyle = color
-            state.canvasCtx.fillRect(x, y, pointSize, pointSize)
+        addNewPointMutation(state, payload) {
+            let index = payload.index
+            let point = payload.pointArrayType
+            state.allPoints[index].push(point)
+            paintPoint(state.canvasCtx,  point)
         },
-        pushNewPoint(state, payload) {
-          let index = payload.index
-          let point = payload.point
-          state.allPoints[index].push(point)
-        },
-        cleanOldPoints(state) {
+        cleanOldPointsMutation(state) {
+            state.canvasCtx.clearRect(0, 0, state.canvas.width, state.canvas.height)
             state.allPoints = [ [] ]
         },
         recolorOldPointMutation(state, payload) {
-            let i = payload.i
-            let j = payload.j
-            let color = payload.color
-            state.allPoints[i][j].color = color
+            let drawingPointNumber = payload.drawingPointNumber
+            let oldPoint = payload.oldPoint
+            let color = state.oldPoints[drawingPointNumber].color
+            let pointToPaint = {
+                x: oldPoint.x,
+                y: oldPoint.y,
+                color: color,
+                size: oldPoint.size
+            }
+            state.allPoints[drawingPointNumber][payload.oldPointIndex].color = color
+            paintPoint(state.canvasCtx,  pointToPaint)
         },
-        updateStartPoint(state, newPoint){
-            state.startPoint = newPoint
-        },
-        stopDrawingFunctions(state) {
+        stopDrawingFunctionsMutation(state) {
+            for (let i = 0; i < state.drawingFunctions.length; i++) {
+                clearInterval(state.drawingFunctions[i])
+            }
             state.drawingFunctions = []
             state.drawingFunctionIsRunning = false
         },
-        runDrawingFunction(state, newFunction) {
+        runDrawingFunctionMutation(state, newFunction) {
             state.drawingFunctions.push(newFunction)
             state.drawingFunctionIsRunning = true
         },
-        addCorePoint(state, payload) {
+        addCorePointMutation(state, payload) {
             let offsetX = payload.x
             let offsetY = payload.y
-            if (state.startPoint.x == null && state.startPoint.y == null) {
-                state.startPoint.x = offsetX
-                state.startPoint.y = offsetY
-            }
             let newCorePoint = {
                 x: offsetX,
                 y: offsetY,
@@ -109,96 +105,66 @@ export default new Vuex.Store({
                 size: state.corePointSize,
             }
             state.corePoints.push(newCorePoint)
-            state.canvasCtx.fillStyle = objectToRgbFunction(newCorePoint.color)
-            state.canvasCtx.fillRect(offsetX, offsetY, newCorePoint.size, newCorePoint.size)
+            paintPoint(state.canvasCtx,  newCorePoint)
         },
-        updateDrawSpeed(state, newVal) {
-            if (newVal > 100) {
-                state.drawSpeed = 100
-            }
-            else if (newVal <= 0 || newVal == "") {
-                state.drawSpeed = 1
-            } else {
-                state.drawSpeed = newVal
-            }
+        updateDrawSpeedMutation(state, newDrawSpeed) {
+            state.drawSpeed = newDrawSpeed
         },
-        updateCountDrawingPoints (state, newValue) {
-            if (newValue > 5) {
-                state.countDrawingPoints = 5
-            }
-            else if (newValue <= 0 || newValue == '') {
-                state.countDrawingPoints = 1
-            } else {
-                state.oldCountDrawingPoints = state.countDrawingPoints
-                state.countDrawingPoints = newValue
-            }
-            let newVal = state.countDrawingPoints
-            let oldVal = state.oldCountDrawingPoints
-            if (newVal > oldVal && state.drawingPoints.length < newVal && state.oldPoints.length < newVal) {
-                for (let i = 0; i < newVal - oldVal; i++) {
-                    state.drawingPoints.push({
-                        color: { r: 255, g: 0, b: 0 },
-                        customSpeed: false,
-                        speed: 1
-                    })
-                    state.allPoints.push( [] )
-                    state.oldPoints.push( {color: {r: 0, g: 0, b: 0} } )
-                }
-            }
-            // if (this.drawingFunctionIsRunning) {
-            //     for(let i = 0; i < oldVal; i++) {
-            //         this.recolorOldPoint(i)
-            //     }
-            //     this.restartAllDrawingFunctions()
-            // }
+        updateCountDrawingPointsMutation (state, newCountDrawingPoints) {
+            state.oldCountDrawingPoints = state.countDrawingPoints
+            state.countDrawingPoints = newCountDrawingPoints
         },
-        updatePointSize(state, newVal) {
-            if (newVal > 30) {
-                state.pointSize = 30
-            }
-            else if (newVal <= 0 || newVal == '') {
-                state.pointSize = 1
-            } else {
-                state.pointSize = newVal
-            }
+        addDrawingPointSlotMutation(state) {
+            state.drawingPoints.push({
+                color: { r: 255, g: 0, b: 0 },
+                customSpeed: false,
+                speed: 1
+            })
         },
-        updateColors(state, payload) {
-            let pointArrayType = payload.pointArrayType
-            let updatedPoint = payload.updatedPoint
-            if(pointArrayType == 'new') {
-                state.drawingPoints[state.selectedNewPoint] = updatedPoint
-            } else if (pointArrayType == 'old') {
-                state.oldPoints[state.selectedOldPoint] = updatedPoint
-            } else if (pointArrayType == 'core') {
-                state.corePoints[state.selectedCorePoint] = updatedPoint
-            }
+        addAllPointSlotMutation(state) {
+            state.allPoints.push( [] )
         },
-        updateColorSelector(state, payload) {
-            let pointArrayType = payload.pointArrayType
-            let selectedPoint = payload.selectedPoint
-            if(pointArrayType == 'new') {
-                state.selectedNewPoint = selectedPoint
-            } else if (pointArrayType == 'old') {
-                state.selectedOldPoint = selectedPoint
-            } else if (pointArrayType == 'core') {
-                state.selectedCorePoint = selectedPoint
-            }
+        addOldPointSlotMutation(state) {
+            state.oldPoints.push( {color: {r: 0, g: 0, b: 0} } )
         },
-        resetNewPointColors(state) {
+        updatePointSizeMutation(state, newPointSize) {
+            state.pointSize = newPointSize
+        },
+        updateNewPointColorMutation(state, updatedPoint) {
+            state.drawingPoints[state.selectedNewPoint] = updatedPoint
+        },
+        updateOldPointColorMutation(state, updatedPoint) {
+            state.oldPoints[state.selectedOldPoint] = updatedPoint
+        },
+        updateCorePointColorMutation(state, updatedPoint) {
+            state.corePoints[state.selectedCorePoint] = updatedPoint
+            paintPoint(state.canvasCtx,  updatedPoint)
+        },
+        updateSelectedNewPointMutation(state, selectedPoint) {
+            state.selectedNewPoint = selectedPoint
+        },
+        updateSelectedCorePointMutation(state, selectedPoint) {
+            state.selectedCorePoint = selectedPoint
+        },
+        updateSelectedOldPointMutation(state, selectedPoint) {
+            state.selectedOldPoint = selectedPoint
+        },
+        resetNewPointColorsMutation(state) {
             for(let i = 0; i < state.drawingPoints.length; i++) {
                 state.drawingPoints[i].color = {r: 255, g: 0, b: 0}
                 state.drawingPoints[i].customSpeed = false
                 state.drawingPoints[i].speed = 1
             }
         },
-        resetOldPointColors(state) {
+        resetOldPointColorsMutation(state) {
             for(let i = 0; i < state.oldPoints.length; i++) {
                 state.oldPoints[i].color = {r: 0, g: 0, b: 0}
             }
         },
-        resetCorePointColors(state) {
+        resetCorePointColorsMutation(state) {
             for(let i = 0; i < state.corePoints.length; i++) {
                 state.corePoints[i].color = {r: 0, g: 0, b: 255}
+                paintPoint(state.canvasCtx,  state.corePoints[i])
             }
         },
         resetCoreSettings(state) {
@@ -207,29 +173,31 @@ export default new Vuex.Store({
             state.getCountDrawingPoints = 1
             state.corePointSize = 15
         },
-        deleteCurrentCorePoint(state) {
-            let x = state.corePoints[state.selectedCorePoint].x
-            let y = state.corePoints[state.selectedCorePoint].y
-            let color
-            if(state.drawingFunctionIsRunning) {
-                color = objectToRgbFunction(state.oldPoints[0].color)
-            } else {
-                color = 'white'
+        deleteCurrentCorePointMutation(state) {
+            let selectedCorePoint = state.selectedCorePoint
+            state.corePoints.splice(selectedCorePoint, 1)
+            if(selectedCorePoint > 0) {
+                state.selectedCorePoint = selectedCorePoint - 1
             }
-            state.canvasCtx.fillStyle = color
-            state.canvasCtx.fillRect(x, y, state.corePointSize, state.corePointSize)
-            state.corePoints.splice(state.selectedCorePoint, 1)
         },
-        initCanvas(state, canvas) {
+        initCanvasMutation(state, canvas) {
             state.canvas = canvas
-            state.canvasCtx = state.canvas.getContext('2d')
+            if(canvas.getContext == null) {
+                console.error('init canvas context error')
+            } else {
+                state.canvasCtx = canvas.getContext('2d')
+            }
         }
     },
     actions: {
-        resetAllSettings({commit}) {
-            commit('resetCorePointColors')
-            commit('resetNewPointColors')
-            commit('resetOldPointColors')
+        deleteCurrentCorePointAction({state, commit}) {
+            repaintDeletedCorePoint(state)
+            commit('deleteCurrentCorePointMutation')
+        },
+        resetAllSettingsAction({commit}) {
+            commit('resetCorePointColorsMutation')
+            commit('resetNewPointColorsMutation')
+            commit('resetOldPointColorsMutation')
         },
         addCorePointAction({commit, state}, payload) {
             let offsetX = payload.x
@@ -241,7 +209,105 @@ export default new Vuex.Store({
                 }
             }
             if(!overlap) {
-                commit('addCorePoint', {x: offsetX, y: offsetY})
+                commit('addCorePointMutation', {x: offsetX, y: offsetY})
+            }
+        },
+        resetPointColorsAction({commit}, pointArrayType) {
+            if (pointArrayType == 'new') {
+                commit('resetNewPointColorsMutation')
+            } else if (pointArrayType == 'old') {
+                commit('resetOldPointColorsMutation')
+            } else if (pointArrayType == 'core') {
+                commit('resetCorePointColorsMutation')
+            } else {
+                unknownPointArrayTypeError(pointArrayType)
+            }
+        },
+        updateColorSelectorAction({commit}, payload) {
+            let pointArrayType = payload.pointArrayType
+            let selectedPoint = payload.selectedPoint
+            if(pointArrayType == 'new') {
+                commit('updateSelectedNewPointMutation', selectedPoint)
+            } else if (pointArrayType == 'old') {
+                commit('updateSelectedOldPointMutation', selectedPoint)
+            } else if (pointArrayType == 'core') {
+                commit('updateSelectedCorePointMutation', selectedPoint)
+            } else {
+                unknownPointArrayTypeError(pointArrayType)
+            }
+        },
+        updatePointColorsAction({commit}, payload) {
+            let pointArrayType = payload.pointArrayType
+            let updatedPoint = payload.updatedPoint
+            if(pointArrayType == 'new') {
+                commit('updateNewPointColorMutation', updatedPoint)
+            } else if (pointArrayType == 'old') {
+                commit('updateOldPointColorMutation', updatedPoint)
+            } else if (pointArrayType == 'core') {
+                commit('updateCorePointColorMutation', updatedPoint)
+            } else {
+                unknownPointArrayTypeError(pointArrayType)
+            }
+        },
+        updatePointSizeAction({commit}, newVal) {
+            let newPointSize
+            if (newVal > 30) {
+                newPointSize = 30
+            }
+            else if (newVal <= 0 || newVal == '') {
+                newPointSize = 1
+            } else {
+                newPointSize = newVal
+            }
+            commit('updatePointSizeMutation', newPointSize)
+        },
+        updateCountDrawingPointsAction({commit, dispatch}, newValue) {
+            let newCountDrawingPoints
+            if (newValue > 5) {
+                newCountDrawingPoints = 5
+            }
+            else if (newValue <= 0 || newValue == '') {
+                newCountDrawingPoints = 1
+            } else {
+                newCountDrawingPoints = newValue
+            }
+            commit('updateCountDrawingPointsMutation', newCountDrawingPoints)
+            dispatch('addPointSlotsAction')
+        },
+        addPointSlotsAction({state, commit}) {
+            let newVal = state.countDrawingPoints
+            let oldVal = state.oldCountDrawingPoints
+            if (newVal > oldVal && state.drawingPoints.length < newVal && state.oldPoints.length < newVal) {
+                for (let i = 0; i < newVal - oldVal; i++) {
+                    commit('addDrawingPointSlotMutation')
+                    commit('addAllPointSlotMutation')
+                    commit('addOldPointSlotMutation')
+                }
+            }
+        },
+        updateDrawSpeedAction({commit}, newVal) {
+            let newDrawSpeed
+            if (newVal > 100) {
+                newDrawSpeed = 100
+            }
+            else if (newVal <= 0 || newVal == "") {
+                newDrawSpeed = 1
+            } else {
+                newDrawSpeed = newVal
+            }
+            commit('updateDrawSpeedMutation', newDrawSpeed)
+        },
+        resetCanvasAction({commit, state}) {
+            commit('resetCanvasMutation')
+            for(let i = 0; i < state.countDrawingPoints; i++) {
+                commit('addAllPointSlotMutation')
+            }
+        },
+        cleanOldPointsAction({state, commit}) {
+            commit('cleanOldPointsMutation')
+            for(let i = 0; i < state.corePoints.length; i++) {
+                let corePoint = state.corePoints[i]
+                paintPoint(state.canvasCtx, corePoint)
             }
         }
     }

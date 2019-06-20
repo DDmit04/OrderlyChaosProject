@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if='point == "new"'>
+        <div v-if='pointArrayType == "new"'>
             <label>
                 <b-form-checkbox class='mt-2'
                                  v-model="pointArray[selectedPoint].customSpeed"></b-form-checkbox>
@@ -14,7 +14,7 @@
                    v-model='pointArray[selectedPoint].speed'
                    class='custom-range mt-2' min='1' max='100'>
             </div>
-        <label>{{point}} point red:
+        <label>{{pointArrayType}} point red:
             <input class='form-control ml-2 mt-2'
                    v-model='pointArray[selectedPoint].color.r'/>
         </label>
@@ -23,7 +23,7 @@
                class='custom-range mt-2'
                min='0' max='255'>
 
-        <label>{{point}} point blue:
+        <label>{{pointArrayType}} point blue:
             <input class='form-control ml-2 mt-2'
                    v-model='pointArray[selectedPoint].color.g'/>
         </label>
@@ -32,7 +32,7 @@
                class='custom-range mt-2'
                min='0' max='255'>
 
-        <label>{{point}} point green:
+        <label>{{pointArrayType}} point green:
             <input class='form-control ml-2 mt-2'
                    v-model='pointArray[selectedPoint].color.b'/>
         </label>
@@ -49,14 +49,20 @@
 </template>
 
 <script>
-    import {mapMutations} from 'vuex'
+    import {mapActions} from 'vuex'
+    import {objectToRgbFunction} from 'helpers/helpFunctions.js'
     export default {
-        props: ['point', 'objectToRgbFunction'],
+        props: ['pointArrayType'],
+        data() {
+            return {
+                objectToRgbFunction: objectToRgbFunction
+            }
+        },
         watch: {
             pointArray: {
                 handler(){
-                    this.updateColors({
-                        pointArrayType: this.point,
+                    this.updatePointColorsAction({
+                        pointArrayType: this.pointArrayType,
                         updatedPoint: this.pointArray[this.selectedPoint]
                     })
                 },
@@ -65,40 +71,21 @@
         },
         computed: {
             pointArray: {
-                get() {
-                    if(this.point == 'new') {
-                        return this.$store.state.drawingPoints
-                    } else if (this.point == 'old') {
-                        return this.$store.state.oldPoints
-                    } else if (this.point == 'core') {
-                        return this.$store.state.corePoints
-                    } else {
-                        console.error('unknown point type ' +
-                            '[' + this.point + ' ' + typeof(this.point) + ']')
-                    }
-                }
+                get() { return this.$store.getters.getPointArray(this.pointArrayType) }
             },
             selectedPoint: {
-                get() {
-                    if(this.point == 'new') {
-                        return this.$store.state.selectedNewPoint
-                    } else if (this.point == 'old') {
-                        return this.$store.state.selectedOldPoint
-                    } else if (this.point == 'core') {
-                        return this.$store.state.selectedCorePoint
-                    } else {
-                        console.error('unknown point type ' +
-                            '[' + this.point + ' ' + typeof(this.point) + ']')
-                    }
-                }
+                get() { return this.$store.getters.getSelectedPoint(this.pointArrayType) }
             }
         },
         methods: {
-            ...mapMutations(['updateColors']),
+            ...mapActions(['updatePointColorsAction']),
         }
     }
 </script>
 
 <style scoped>
-
+    .commonColorBox {
+        width: 50px;
+        height: 50px;
+    }
 </style>

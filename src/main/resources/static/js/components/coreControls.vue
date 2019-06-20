@@ -9,12 +9,12 @@
         <label>point size: <input class='form-control ml-2 mt-2' v-model='pointSize'/></label>
         <input type='range' v-model='pointSize' class='custom-range mt-2' min='1' max='30'>
 
-        <button class='btn btn-danger mt-2' @click='resetAllSettings'>reset all points settings</button>
+        <button class='btn btn-danger mt-2' @click='resetAllSettingsAction'>reset all points settings</button>
     </div>
 </template>
 
 <script>
-    import {mapMutations, mapActions} from 'vuex'
+    import {mapActions} from 'vuex'
     export default {
         name: "coreControls",
         computed: {
@@ -23,7 +23,7 @@
                     return this.$store.state.countDrawingPoints
                 },
                 set(newVal) {
-                    this.updateCountDrawingPoints(newVal)
+                    this.updateCountDrawingPointsAction(newVal)
                 }
             },
             pointSize: {
@@ -31,7 +31,7 @@
                     return this.$store.state.pointSize
                 },
                 set(newVal) {
-                    this.updatePointSize(newVal)
+                    this.updatePointSizeAction(newVal)
                 }
             },
             drawSpeed: {
@@ -39,13 +39,13 @@
                     return this.$store.state.drawSpeed
                 },
                 set(newVal) {
-                    this.updateDrawSpeed(newVal)
+                    this.updateDrawSpeedAction(newVal)
                 }
             }
         },
         methods: {
-            ...mapMutations(['updateCountDrawingPoints', 'updateDrawSpeed', 'updatePointSize']),
-            ...mapActions(['resetAllSettings'])
+            ...mapActions(['resetAllSettingsAction', 'updateCountDrawingPointsAction',
+                            'updateDrawSpeedAction', 'updatePointSizeAction'])
         }
     }
 </script>
