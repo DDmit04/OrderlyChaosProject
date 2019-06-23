@@ -3,9 +3,9 @@
         <div class='row mt-3 ml-1'>
             <div v-for='(somePoint, index) in pointArray'>
                 <div class='mx-2 smallColorBox'
-                     :style='{ background: objectToRgbFunction(somePoint.color) }'
                      :id='pointArrayType + index'
-                     @click='selectedPoint = index'
+                     :style='{ background: objectToRgbFunction(somePoint.color) }'
+                     @click='changeSelectedPoint(index)'
                      @mouseover='addColorBoxStyle(pointArrayType + index)'
                      @mouseout='removeColorBoxStyle(pointArrayType + index)'>
                 </div>
@@ -21,7 +21,7 @@
             </option>
         </b-form-select>
 
-        <div v-if='pointArrayType == "core"'>
+        <div v-if='pointArrayType === "core"'>
             <button v-if='pointArray.length > 2 || !drawingFunctionIsRunning'
                     class='btn btn-danger' @click='deleteCurrentCorePointAction'>
                 delete this point
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-    import { mapMutations, mapState, mapActions} from 'vuex'
+    import { mapState, mapActions} from 'vuex'
     import {objectToRgbFunction} from 'helpers/helpFunctions.js'
 
     export default {
@@ -48,9 +48,7 @@
                 get() { return this.$store.getters.getPointArray(this.pointArrayType) }
             },
             selectedPoint: {
-                get() {
-                    return this.$store.getters.getSelectedPoint(this.pointArrayType)
-                },
+                get() { return this.$store.getters.getSelectedPoint(this.pointArrayType) },
                 set(newVal) {
                     this.updateColorSelectorAction({
                         selectedPoint: newVal,
@@ -69,8 +67,9 @@
                 let colorBox = document.getElementById(id)
                 colorBox.style.outline = ''
             },
-
-
+            changeSelectedPoint(index) {
+                this.selectedPoint = index
+            },
         }
     }
 </script>

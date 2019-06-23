@@ -29,6 +29,24 @@ export function repaintDeletedCorePoint(state) {
     paintPoint(state.canvasCtx,  pointToPaint)
 }
 
-export function unknownPointArrayTypeError(pointArrayType) {
-    console.error('unknown pointArrayType ' + '[ ' + pointArrayType + ' - ' + typeof(pointArrayType) +' ]')
+export function unknownPointArrayTypeError(pointArrayType, actionName) {
+    console.error(actionName + ': [unknown pointArrayType ' + '[ ' + pointArrayType + ' - ' + typeof(pointArrayType) +' ] ]')
+}
+
+export function validateColors(colorObject) {
+    for(let pointColor in colorObject) {
+        colorObject[pointColor] = validateColor(colorObject[pointColor])
+    }
+}
+
+function validateColor(color) {
+    let resColor
+    if(color > 255) {
+        resColor = 255
+    } else if(color < 0) {
+        resColor = 0
+    } else {
+        resColor =  color
+    }
+    return resColor
 }

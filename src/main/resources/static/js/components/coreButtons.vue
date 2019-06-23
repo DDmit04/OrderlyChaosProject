@@ -1,47 +1,62 @@
 <template>
     <div>
         <button class='btn btn-success'
-                data-toggle="tooltip" data-placement="top" title="make two point on canvas to start drawing"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="make two point on canvas to start drawing"
                 :disabled='drawingFunctionIsRunning || corePoints.length < 2'
                 @keyup.enter='startDraw'
                 @click='startDraw'>
-            <div v-if='corePoints.length < 2'>no points</div>
-            <div v-else-if='drawingFunctionIsRunning'>running</div>
-            <div v-else-if='allPoints[0].length > 0 && !drawingFunctionIsRunning'>continue</div>
-            <div v-else>start</div>
+            <div v-if='corePoints.length < 2'>
+                no points
+            </div>
+            <div v-else-if='drawingFunctionIsRunning'>
+                running
+            </div>
+            <div v-else-if='allPoints[0].length > 0 && !drawingFunctionIsRunning'>
+                continue
+            </div>
+            <div v-else>
+                start
+            </div>
         </button>
         <button class='btn btn-primary'
-                :disabled='!drawingFunctionIsRunning' @click='stopDrawingFunctionsMutation'>
+                :disabled='!drawingFunctionIsRunning'
+                @click='stopDraw'>
             stop
         </button>
         <button class='btn btn-primary'
-                :disabled='corePoints.length < 2' @click='drawOnePointFunction(0)'>
+                :disabled='corePoints.length < 2'
+                @click='drawOnePointFunction(0)'>
             draw one
         </button>
         <button class='btn btn-danger'
-                :disabled='corePoints.length == 0 && allPoints[0].length == 0' @click='resetCanvas'>
+                :disabled='corePoints.length == 0 && allPoints[0].length == 0'
+                @click='resetCanvas'>
             reset
         </button>
-        <button class='btn btn-primary mt-2'
-                :disabled='allPoints[0].length == 0' @click='cleanOldPointsAction'>
+        <button class='btn btn-primary mt-lg-2'
+                :disabled='allPoints[0].length == 0'
+                @click='cleanOldPoints'>
             clean old points
         </button>
     </div>
 </template>
 
 <script>
-    import {mapState, mapMutations, mapActions} from 'vuex'
+    import {mapState, mapActions} from 'vuex'
     export default {
-        props:['drawOnePointFunction', 'startAllDrawingFunctions'],
+        props:['drawOnePointFunction',
+                'startAllDrawingFunctions',
+                'stopAllDrawingFunctions'],
         name: "coreButtons",
         computed: {
             ...mapState(['drawingFunctionIsRunning', 'corePoints', 'allPoints'])
         },
         methods: {
-            ...mapMutations(['stopDrawingFunctionsMutation']),
             ...mapActions(['resetCanvasAction', 'cleanOldPointsAction']),
             resetCanvas() {
-                this.stopDrawingFunctionsMutation()
+                this.stopAllDrawingFunctions()
                 this.resetCanvasAction()
             },
             startDraw() {
@@ -49,6 +64,12 @@
                     this.startAllDrawingFunctions()
                 }
             },
+            stopDraw() {
+              this.stopAllDrawingFunctions()
+            },
+            cleanOldPoints() {
+                this.cleanOldPointsAction()
+            }
         }
     }
 </script>

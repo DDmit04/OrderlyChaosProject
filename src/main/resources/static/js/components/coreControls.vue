@@ -1,15 +1,38 @@
 <template>
     <div>
-        <label>draw Speed: <input class='form-control ml-2' v-model='drawSpeed'/></label>
-        <input type='range' v-model='drawSpeed' class='custom-range mt-2' min='1' max='100'>
+        <label class='justify-content-start' for='drawSpeed'>
+            draw Speed:
+            <input class='form-control ml-2' v-model='drawSpeed'/>
+        </label>
+        <input class='custom-range mt-2'
+               v-model='drawSpeed'
+               id='drawSpeed'
+               type='range'
+               min='1' max='100'>
 
-        <label>drawing points: <input class='form-control ml-2 mt-2' v-model='countDrawingPoints'/></label>
-        <input type='range' v-model='countDrawingPoints' class='custom-range mt-2' min='1' max='5'>
+        <label class='justify-content-start' for='countDrawingPoints'>
+            drawing points:
+            <input class='form-control ml-2 mt-2' v-model='countDrawingPoints'/>
+        </label>
+        <input class='custom-range mt-2'
+               v-model='countDrawingPoints'
+               id='countDrawingPoints'
+               type='range'
+               min='1' max='5'>
 
-        <label>point size: <input class='form-control ml-2 mt-2' v-model='pointSize'/></label>
-        <input type='range' v-model='pointSize' class='custom-range mt-2' min='1' max='30'>
+        <label class='justify-content-start' for='pointSize'>
+            point size:
+            <input class='form-control ml-2 mt-2' v-model='pointSize'/>
+        </label>
+        <input class='custom-range mt-2'
+               v-model='pointSize'
+               id='pointSize'
+               type='range'
+               min='1' max='30'>
 
-        <button class='btn btn-danger mt-2' @click='resetAllSettingsAction'>reset all points settings</button>
+        <button class='btn btn-danger mt-2' @click='resetAllSettingsAction'>
+            reset all points settings
+        </button>
     </div>
 </template>
 
@@ -19,28 +42,16 @@
         name: "coreControls",
         computed: {
             countDrawingPoints: {
-                get() {
-                    return this.$store.state.countDrawingPoints
-                },
-                set(newVal) {
-                    this.updateCountDrawingPointsAction(newVal)
-                }
+                get() { return this.$store.state.countDrawingPoints },
+                set(newVal) { this.updateCountDrawingPointsAction(newVal) }
             },
             pointSize: {
-                get() {
-                    return this.$store.state.pointSize
-                },
-                set(newVal) {
-                    this.updatePointSizeAction(newVal)
-                }
+                get() { return this.$store.state.pointSize },
+                set(newVal) { this.updatePointSizeAction(newVal) }
             },
             drawSpeed: {
-                get() {
-                    return this.$store.state.drawSpeed
-                },
-                set(newVal) {
-                    this.updateDrawSpeedAction(newVal)
-                }
+                get() { return this.$store.state.drawSpeed },
+                set(newVal) { this.updateDrawSpeedAction(newVal) }
             }
         },
         methods: {
