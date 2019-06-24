@@ -25,6 +25,7 @@ public class FeedbackController {
     @PostMapping()
     public Feedback getFeedback(@RequestBody Feedback feedback) {
         Feedback savedFeedback = feedbackRepo.save(feedback);
+        if(feedback.getFeedbackText().equals("") || feedback.getEmail().equals(""))
         mailSender.send("orderly chaos feedback from " + feedback.getEmail(), feedback.getFeedbackText());
         return savedFeedback;
     }

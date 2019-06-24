@@ -20,21 +20,29 @@
                         <input class="form-control"
                                v-model='feedbackEmail'
                                id="exampleFormControlInput1"
+                               v-validate.initial="'required|email'"
+                               name="email"
                                type="email"
                                placeholder="name@example.com">
+                        <div>
+                            <span class='mt-1' style='color: red'>{{ errors.first('email') }}</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="exampleFormControlTextarea1">your feedback</label>
                         <textarea class="form-control"
                                   id="exampleFormControlTextarea1"
                                   v-model='feedbackText'
+                                  v-validate.initial="'required'"
+                                  name='feedText'
                                   rows="3"/>
                     </div>
+                    <span class='mt-1' style='color: red'>{{ errors.first('feedText') }}</span>
                 </form>
             </div>
             <template slot="modal-footer" slot-scope="{ ok, cancel, hide }">
                 <div v-if='!feedbackSent'>
-                    <b-button size="sm" variant="success" @click="sendFeedback" :disabled='loading'>
+                    <b-button size="sm" variant="success" @click="sendFeedback" :disabled='loading || !validate'>
                         <b-spinner v-if='loading'></b-spinner>
                         <div v-else>send</div>
                     </b-button>
@@ -61,6 +69,11 @@
                 feedbackEmail: '',
             }
         },
+        computed: {
+          validate() {
+              return this.validateEmail(this.feedbackEmail) && this.feedbackText != ''
+          }
+        },
         methods: {
             async sendFeedback() {
                 let feedbackMessage = {
@@ -84,6 +97,10 @@
                 this.loading = false
                 this.feedbackSent = false
                 this.feedbackError = false
+            },
+            validateEmail(email) {
+                let regExp = /^([a-z0-9_\.-])+@[a-z0-9-]+\.([a-z]{2,6}\.)?[a-z]{2,6}$/i
+                return regExp.test(email)
             }
         }
     }

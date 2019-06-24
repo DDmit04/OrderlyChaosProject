@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import {paintPoint, repaintDeletedCorePoint,
-        unknownPointArrayTypeError} from 'helpers/helpFunctions.js'
+        unknownPointArrayTypeError, validateColors} from 'helpers/helpFunctions.js'
 
 Vue.use(Vuex)
 
@@ -27,43 +27,45 @@ export default new Vuex.Store({
         drawingFunctionIsRunning: false,
         canvas: null,
         canvasCtx: null,
-        drawingFunctions: [],
+        allPointsLimit: 90
     },
     getters: {
-
         getPointArray: (state) => (context) => {
-            if (context == 'new') {
+            if (context === 'new') {
                 return state.drawingPoints.slice(0, state.countDrawingPoints)
-            } else if (context == 'old') {
+            } else if (context === 'old') {
                 return state.oldPoints.slice(0, state.countDrawingPoints)
-            } else if (context == 'core') {
+            } else if (context === 'core') {
                 return state.corePoints
+            } else {
+                unknownPointArrayTypeError(context, 'getPointArray')
             }
         },
         getSelectedPoint: (state) => (context) => {
-            if(context == 'new') {
+            if(context === 'new') {
                 return state.selectedNewPoint
-            } else if (context == 'old') {
+            } else if (context === 'old') {
                 return state.selectedOldPoint
-            } else if (context == 'core') {
+            } else if (context === 'core') {
                 return state.selectedCorePoint
+            } else {
+                unknownPointArrayTypeError(context, 'getSelectedPoint')
             }
         },
     },
     mutations: {
         cleanAllPointsArrayMutation(state, drawingPointNumber) {
-            state.allPoints[drawingPointNumber].splice(0, 90)
+            state.allPoints[drawingPointNumber].splice(0, state.allPointsLimit)
         },
         resetCanvasMutation(state) {
             state.canvasCtx.clearRect(0, 0, state.canvas.width, state.canvas.height)
             state.corePoints = []
             state.allPoints = []
-            state.drawingFunctions = []
             state.startPoint = {x: null, y: null}
         },
         addNewPointMutation(state, payload) {
+            let point = payload.point
             let index = payload.index
-            let point = payload.pointArrayType
             state.allPoints[index].push(point)
             paintPoint(state.canvasCtx,  point)
         },
@@ -75,24 +77,19 @@ export default new Vuex.Store({
             let drawingPointNumber = payload.drawingPointNumber
             let oldPoint = payload.oldPoint
             let color = state.oldPoints[drawingPointNumber].color
+            state.allPoints[drawingPointNumber][payload.oldPointIndex].color = color
             let pointToPaint = {
                 x: oldPoint.x,
                 y: oldPoint.y,
                 color: color,
                 size: oldPoint.size
             }
-            state.allPoints[drawingPointNumber][payload.oldPointIndex].color = color
             paintPoint(state.canvasCtx,  pointToPaint)
         },
         stopDrawingFunctionsMutation(state) {
-            for (let i = 0; i < state.drawingFunctions.length; i++) {
-                clearInterval(state.drawingFunctions[i])
-            }
-            state.drawingFunctions = []
             state.drawingFunctionIsRunning = false
         },
-        runDrawingFunctionMutation(state, newFunction) {
-            state.drawingFunctions.push(newFunction)
+        startDrawingFunctionMutation(state) {
             state.drawingFunctionIsRunning = true
         },
         addCorePointMutation(state, payload) {
@@ -107,13 +104,6 @@ export default new Vuex.Store({
             state.corePoints.push(newCorePoint)
             paintPoint(state.canvasCtx,  newCorePoint)
         },
-        updateDrawSpeedMutation(state, newDrawSpeed) {
-            state.drawSpeed = newDrawSpeed
-        },
-        updateCountDrawingPointsMutation (state, newCountDrawingPoints) {
-            state.oldCountDrawingPoints = state.countDrawingPoints
-            state.countDrawingPoints = newCountDrawingPoints
-        },
         addDrawingPointSlotMutation(state) {
             state.drawingPoints.push({
                 color: { r: 255, g: 0, b: 0 },
@@ -127,18 +117,32 @@ export default new Vuex.Store({
         addOldPointSlotMutation(state) {
             state.oldPoints.push( {color: {r: 0, g: 0, b: 0} } )
         },
+
+        updateDrawSpeedMutation(state, newDrawSpeed) {
+            state.drawSpeed = newDrawSpeed
+        },
+        updateCountDrawingPointsMutation (state, newCountDrawingPoints) {
+            state.oldCountDrawingPoints = state.countDrawingPoints
+            state.countDrawingPoints = newCountDrawingPoints
+        },
         updatePointSizeMutation(state, newPointSize) {
             state.pointSize = newPointSize
         },
+
+        updateNewPointSpeedMutation(state, updatedPoint) {
+            state.drawingPoints[state.selectedNewPoint].speed = updatedPoint.speed
+            state.drawingPoints[state.selectedNewPoint].customSpeed = updatedPoint.customSpeed
+        },
+
         updateNewPointColorMutation(state, updatedPoint) {
-            state.drawingPoints[state.selectedNewPoint] = updatedPoint
+            state.drawingPoints[state.selectedNewPoint].color = updatedPoint.color
         },
         updateOldPointColorMutation(state, updatedPoint) {
-            state.oldPoints[state.selectedOldPoint] = updatedPoint
+            state.oldPoints[state.selectedOldPoint].color = updatedPoint.color
         },
         updateCorePointColorMutation(state, updatedPoint) {
-            state.corePoints[state.selectedCorePoint] = updatedPoint
-            paintPoint(state.canvasCtx,  updatedPoint)
+            state.corePoints[state.selectedCorePoint].color = updatedPoint.color
+            paintPoint(state.canvasCtx, updatedPoint)
         },
         updateSelectedNewPointMutation(state, selectedPoint) {
             state.selectedNewPoint = selectedPoint
@@ -149,6 +153,7 @@ export default new Vuex.Store({
         updateSelectedOldPointMutation(state, selectedPoint) {
             state.selectedOldPoint = selectedPoint
         },
+
         resetNewPointColorsMutation(state) {
             for(let i = 0; i < state.drawingPoints.length; i++) {
                 state.drawingPoints[i].color = {r: 255, g: 0, b: 0}
@@ -204,49 +209,53 @@ export default new Vuex.Store({
             let offsetY = payload.y
             let overlap = false
             for(let i = 0; i < state.corePoints.length; i++) {
-                if(state.corePoints[i].x == offsetX && state.corePoints[i].y == offsetY) {
+                if(state.corePoints[i].x === offsetX && state.corePoints[i].y === offsetY) {
                     overlap = true
                 }
             }
             if(!overlap) {
                 commit('addCorePointMutation', {x: offsetX, y: offsetY})
+            } else {
+                console.log('addCorePointAction: [there is already a point]')
             }
         },
         resetPointColorsAction({commit}, pointArrayType) {
-            if (pointArrayType == 'new') {
+            if (pointArrayType === 'new') {
                 commit('resetNewPointColorsMutation')
-            } else if (pointArrayType == 'old') {
+            } else if (pointArrayType === 'old') {
                 commit('resetOldPointColorsMutation')
-            } else if (pointArrayType == 'core') {
+            } else if (pointArrayType === 'core') {
                 commit('resetCorePointColorsMutation')
             } else {
-                unknownPointArrayTypeError(pointArrayType)
+                unknownPointArrayTypeError(pointArrayType, 'resetPointColorsAction')
             }
         },
         updateColorSelectorAction({commit}, payload) {
             let pointArrayType = payload.pointArrayType
             let selectedPoint = payload.selectedPoint
-            if(pointArrayType == 'new') {
+            if(pointArrayType === 'new') {
                 commit('updateSelectedNewPointMutation', selectedPoint)
-            } else if (pointArrayType == 'old') {
+            } else if (pointArrayType === 'old') {
                 commit('updateSelectedOldPointMutation', selectedPoint)
-            } else if (pointArrayType == 'core') {
+            } else if (pointArrayType === 'core') {
                 commit('updateSelectedCorePointMutation', selectedPoint)
             } else {
-                unknownPointArrayTypeError(pointArrayType)
+                unknownPointArrayTypeError(pointArrayType, 'updateColorSelectorAction')
             }
         },
-        updatePointColorsAction({commit}, payload) {
+        updatePointDataAction({commit}, payload) {
             let pointArrayType = payload.pointArrayType
             let updatedPoint = payload.updatedPoint
-            if(pointArrayType == 'new') {
+            validateColors(updatedPoint.color)
+            if(pointArrayType === 'new') {
                 commit('updateNewPointColorMutation', updatedPoint)
-            } else if (pointArrayType == 'old') {
+                commit('updateNewPointSpeedMutation', updatedPoint)
+            } else if (pointArrayType === 'old') {
                 commit('updateOldPointColorMutation', updatedPoint)
-            } else if (pointArrayType == 'core') {
+            } else if (pointArrayType === 'core') {
                 commit('updateCorePointColorMutation', updatedPoint)
             } else {
-                unknownPointArrayTypeError(pointArrayType)
+                unknownPointArrayTypeError(pointArrayType, 'updatePointDataAction')
             }
         },
         updatePointSizeAction({commit}, newVal) {
@@ -254,19 +263,31 @@ export default new Vuex.Store({
             if (newVal > 30) {
                 newPointSize = 30
             }
-            else if (newVal <= 0 || newVal == '') {
+            else if (newVal <= 0) {
                 newPointSize = 1
             } else {
                 newPointSize = newVal
             }
             commit('updatePointSizeMutation', newPointSize)
         },
+        updateDrawSpeedAction({commit}, newVal) {
+            let newDrawSpeed
+            if (newVal > 100) {
+                newDrawSpeed = 100
+            }
+            else if (newVal <= 0) {
+                newDrawSpeed = 1
+            } else {
+                newDrawSpeed = newVal
+            }
+            commit('updateDrawSpeedMutation', newDrawSpeed)
+        },
         updateCountDrawingPointsAction({commit, dispatch}, newValue) {
             let newCountDrawingPoints
             if (newValue > 5) {
                 newCountDrawingPoints = 5
             }
-            else if (newValue <= 0 || newValue == '') {
+            else if (newValue <= 0) {
                 newCountDrawingPoints = 1
             } else {
                 newCountDrawingPoints = newValue
@@ -284,18 +305,6 @@ export default new Vuex.Store({
                     commit('addOldPointSlotMutation')
                 }
             }
-        },
-        updateDrawSpeedAction({commit}, newVal) {
-            let newDrawSpeed
-            if (newVal > 100) {
-                newDrawSpeed = 100
-            }
-            else if (newVal <= 0 || newVal == "") {
-                newDrawSpeed = 1
-            } else {
-                newDrawSpeed = newVal
-            }
-            commit('updateDrawSpeedMutation', newDrawSpeed)
         },
         resetCanvasAction({commit, state}) {
             commit('resetCanvasMutation')

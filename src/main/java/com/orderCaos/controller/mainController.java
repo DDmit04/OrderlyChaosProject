@@ -11,9 +11,4 @@ public class mainController {
 		return "index";
 	}
 
-	@GetMapping("/wdf")
-	public String aawpp() {
-		return "index";
-	}
-
 }

@@ -12,13 +12,18 @@
         </nav>
 
         <div class='row mt-4 ml-1'>
-            <div class='col mb-2-sm'>
+            <div class='col'>
                 <canvas id='canv'
-                        width='950'
+                        width='920'
                         height='950'
                         style='border: 2px solid black'
                         @click='addCorePoint'>
                 </canvas>
+                <a download="OrderlyChaos.png"
+                   :href='image'
+                   @click='downloadImage'>
+                    <button class='btn btn-primary my-2' type="button">Download image</button>
+                </a>
             </div>
             <div class='col-lg col-sm'>
                 <div class='card mb-2'>
@@ -43,15 +48,10 @@
                                     <pointColors :pointArrayType='"old"'
                                                  :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
                                 </b-tab>
-                                <b-tab title='core point'>
-                                    <div v-if='corePoints.length > 0'>
+                                <b-tab title='core point' :disabled='corePoints.length === 0'>
                                         <pointSelector :pointArrayType='"core"'/>
                                         <pointColors :pointArrayType="'core'"
                                                      :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
-                                    </div>
-                                    <div v-else class='mx-auto mt-2'>
-                                        no core points yet
-                                    </div>
                                 </b-tab>
                             </b-tabs>
                         </div>
@@ -81,6 +81,7 @@
         },
         data() {
             return {
+                image: null,
                 movingPoint: {
                     x: null,
                     y: null
@@ -90,7 +91,7 @@
         },
         computed:
             mapState(['drawingPoints', 'corePoints',
-                    'countDrawingPoints', 'pointSize',
+                    'countDrawingPoints', 'pointSize', 'canvas',
                     'drawSpeed', 'allPoints', 'allPointsLimit',
                     'oldCountDrawingPoints', 'drawingFunctionIsRunning']),
         mounted: function () {
@@ -127,7 +128,9 @@
                 'startDrawingFunctionMutation', 'stopDrawingFunctionsMutation',
                 'recolorOldPointMutation',
                 'updateMovingPointMutation', 'cleanAllPointsArrayMutation']),
-
+            downloadImage() {
+                this.image = this.canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+            },
             addCorePoint(event) {
                 let offsetX = event.offsetX
                 let offsetY = event.offsetY
