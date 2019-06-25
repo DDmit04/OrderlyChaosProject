@@ -49,9 +49,11 @@
                                                  :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
                                 </b-tab>
                                 <b-tab title='core point' :disabled='corePoints.length === 0'>
+                                    <div v-if='corePoints.length > 0'>
                                         <pointSelector :pointArrayType='"core"'/>
                                         <pointColors :pointArrayType="'core'"
                                                      :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
+                                    </div>
                                 </b-tab>
                             </b-tabs>
                         </div>

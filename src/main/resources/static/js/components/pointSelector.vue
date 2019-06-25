@@ -3,14 +3,18 @@
         <div class='row mt-3 ml-1'>
             <div v-for='(somePoint, index) in pointArray'>
                 <div class='mx-2 smallColorBox'
+                     :class="pointArray.length > 12 ? 'mt-2' : ''"
                      :id='pointArrayType + index'
                      :style='{ background: objectToRgbFunction(somePoint.color) }'
+                     style='border: 1px solid black'
                      @click='changeSelectedPoint(index)'
                      @mouseover='addColorBoxStyle(pointArrayType + index)'
                      @mouseout='removeColorBoxStyle(pointArrayType + index)'>
                 </div>
             </div>
-            <button class='btn btn-primary ml-2' @click='resetPointColorsAction(pointArrayType)'>
+            <button class='btn btn-primary ml-2'
+                    :class="pointArray.length > 8 ? 'mt-2' : ''"
+                    @click='resetPointColorsAction(pointArrayType)'>
                 reset colors
             </button>
         </div>
@@ -39,6 +43,7 @@
         name: "colorSelector",
         data() {
             return {
+                marginClass: 'mt-1',
                 objectToRgbFunction: objectToRgbFunction
             }
         },

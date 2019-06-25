@@ -1,44 +1,44 @@
 <template>
     <div>
         <div v-if='pointArrayType == "new"'>
-            <label>
-                <b-form-checkbox class='mt-2'
-                                 v-model="pointArray[selectedPoint].customSpeed"></b-form-checkbox>
+            <label class='justify-content-start'>
+                <b-form-checkbox class='mt-2' v-model="pointArray[selectedPoint].customSpeed"/>
                 point speed:
-                <input :disabled='!pointArray[selectedPoint].customSpeed'
-                       class='form-control ml-2 mt-2'
+                <input class='form-control ml-2 mt-2'
+                       :disabled='!pointArray[selectedPoint].customSpeed'
                        v-model='pointArray[selectedPoint].speed'/>
             </label>
-            <input :disabled='!pointArray[selectedPoint].customSpeed'
-                   type='range'
+            <input class='custom-range mt-2'
+                   :disabled='!pointArray[selectedPoint].customSpeed'
                    v-model='pointArray[selectedPoint].speed'
-                   class='custom-range mt-2' min='1' max='100'>
-            </div>
-        <label>{{pointArrayType}} point red:
-            <input class='form-control ml-2 mt-2'
-                   v-model='pointArray[selectedPoint].color.r'/>
+                   type='range'
+                   min='1' max='100'>
+        </div>
+        <label class='justify-content-start' for='pointRed'>{{pointArrayType}} point red:
+            <input class='form-control ml-2 mt-2' v-model='pointArray[selectedPoint].color.r'/>
         </label>
-        <input type='range'
+        <input class='custom-range mt-2'
                v-model='pointArray[selectedPoint].color.r'
-               class='custom-range mt-2'
+               id='pointRed'
+               type='range'
                min='0' max='255'>
 
-        <label>{{pointArrayType}} point blue:
-            <input class='form-control ml-2 mt-2'
-                   v-model='pointArray[selectedPoint].color.g'/>
+        <label class='justify-content-start' for='pointGreen'>{{pointArrayType}} point green:
+            <input class='form-control ml-2 mt-2' v-model='pointArray[selectedPoint].color.g'/>
         </label>
-        <input type='range'
+        <input class='custom-range mt-2'
                v-model='pointArray[selectedPoint].color.g'
-               class='custom-range mt-2'
+               id='pointGreen'
+               type='range'
                min='0' max='255'>
 
-        <label>{{pointArrayType}} point green:
-            <input class='form-control ml-2 mt-2'
-                   v-model='pointArray[selectedPoint].color.b'/>
+        <label class='justify-content-start' for='pointBlue'>{{pointArrayType}} point blue:
+            <input class='form-control ml-2 mt-2' v-model='pointArray[selectedPoint].color.b'/>
         </label>
-        <input type='range'
+        <input class='custom-range mt-2'
                v-model='pointArray[selectedPoint].color.b'
-               class='custom-range mt-2'
+               id='pointBlue'
+               type='range'
                min='0' max='255'>
 
         <div class='mx-2 mt-2 commonColorBox'
@@ -49,10 +49,10 @@
 </template>
 
 <script>
-    import {mapActions} from 'vuex'
+    import {mapActions, mapState} from 'vuex'
     import {objectToRgbFunction} from 'helpers/helpFunctions.js'
     export default {
-        props: ['pointArrayType'],
+        props: ['pointArrayType', 'restartAllDrawingFunctions'],
         data() {
             return {
                 objectToRgbFunction: objectToRgbFunction
@@ -61,15 +61,19 @@
         watch: {
             pointArray: {
                 handler(){
-                    this.updatePointColorsAction({
+                    this.updatePointDataAction({
                         pointArrayType: this.pointArrayType,
                         updatedPoint: this.pointArray[this.selectedPoint]
                     })
+                    if(this.drawingFunctionIsRunning) {
+                        this.restartAllDrawingFunctions()
+                    }
                 },
                 deep: true
             }
         },
         computed: {
+            ...mapState(['drawingFunctionIsRunning']),
             pointArray: {
                 get() { return this.$store.getters.getPointArray(this.pointArrayType) }
             },
@@ -78,7 +82,7 @@
             }
         },
         methods: {
-            ...mapActions(['updatePointColorsAction']),
+            ...mapActions(['updatePointDataAction']),
         }
     }
 </script>

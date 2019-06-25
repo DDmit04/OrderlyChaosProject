@@ -1,7 +1,7 @@
 <template>
     <div>
         <li class="nav-item">
-            <a v-b-modal.modal-1 class="nav-link active" href="#">feedback</a>
+            <a class="nav-link active" v-b-modal.modal-1 href='javascript:void(0)'>feedback</a>
         </li>
 
         <b-modal id="modal-1"
@@ -20,7 +20,7 @@
                         <input class="form-control"
                                v-model='feedbackEmail'
                                id="exampleFormControlInput1"
-                               v-validate.initial="'required|email'"
+                               v-validate="'required|email'"
                                name="email"
                                type="email"
                                placeholder="name@example.com">
@@ -33,8 +33,9 @@
                         <textarea class="form-control"
                                   id="exampleFormControlTextarea1"
                                   v-model='feedbackText'
-                                  v-validate.initial="'required'"
+                                  v-validate="'required'"
                                   name='feedText'
+                                  type='text'
                                   rows="3"/>
                     </div>
                     <span class='mt-1' style='color: red'>{{ errors.first('feedText') }}</span>
