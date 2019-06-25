@@ -18,8 +18,7 @@
                v-model='countDrawingPoints'
                id='countDrawingPoints'
                type='range'
-               min='1' max='5'>
-
+               min='1' :max='drawingPointsLimit'>
         <label class='justify-content-start' for='pointSize'>
             point size:
             <input class='form-control ml-2 mt-2' v-model='pointSize'/>
@@ -37,10 +36,11 @@
 </template>
 
 <script>
-    import {mapActions} from 'vuex'
+    import {mapActions, mapState} from 'vuex'
     export default {
         name: "coreControls",
         computed: {
+            ...mapState(['drawingPointsLimit']),
             countDrawingPoints: {
                 get() { return this.$store.state.countDrawingPoints },
                 set(newVal) { this.updateCountDrawingPointsAction(newVal) }

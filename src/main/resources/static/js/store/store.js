@@ -8,6 +8,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     strict: true,
     state: {
+        drawingPointsLimit: drawingPointsLimit,
         drawingPoints: [
             { color: {r: 255, g: 0, b: 0}, customSpeed: false, speed: 1 }
         ],
@@ -282,10 +283,10 @@ export default new Vuex.Store({
             }
             commit('updateDrawSpeedMutation', newDrawSpeed)
         },
-        updateCountDrawingPointsAction({commit, dispatch}, newValue) {
+        updateCountDrawingPointsAction({commit, dispatch, state}, newValue) {
             let newCountDrawingPoints
-            if (newValue > 5) {
-                newCountDrawingPoints = 5
+            if (newValue > state.drawingPointsLimit) {
+                newCountDrawingPoints = state.drawingPointsLimit
             }
             else if (newValue <= 0) {
                 newCountDrawingPoints = 1
