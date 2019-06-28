@@ -105,7 +105,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>yarn build</id>
+						<id>yarn install</id>
 						<goals>
 							<goal>yarn</goal>
 						</goals>
@@ -114,7 +114,7 @@
                             "install", so unless you need to run some other yarn command,
                             you can remove this whole <configuration> section.
                             -->
-							<arguments>build</arguments>
+							<arguments>install</arguments>
 						</configuration>
 					</execution>
 				</executions>
