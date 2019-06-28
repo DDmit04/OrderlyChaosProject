@@ -110,6 +110,7 @@
 							<arguments>install</arguments>
 						</configuration>
 					</execution>
+
 					<!-- Build and minify static files -->
 					<execution>
 						<id>npm run build</id>
@@ -117,7 +118,7 @@
 							<goal>npm</goal>
 						</goals>
 						<configuration>
-							<arguments>build</arguments>
+							<arguments>npm run-script build</arguments>
 						</configuration>
 					</execution>
 				</executions>
