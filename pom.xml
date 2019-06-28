@@ -83,49 +83,42 @@
 				<artifactId>heroku-maven-plugin</artifactId>
 				<version>2.0.8</version>
 			</plugin>
-<!--			<plugin>-->
-<!--				<groupId>com.github.eirslett</groupId>-->
-<!--				<artifactId>frontend-maven-plugin</artifactId>-->
-<!--				<configuration>-->
-<!--					<installDirectory>target</installDirectory>-->
-<!--				</configuration>-->
-<!--				<executions>-->
-<!--					&lt;!&ndash; Install our node and npm version to run npm/node scripts&ndash;&gt;-->
-<!--					<execution>-->
-<!--						<id>install node and npm</id>-->
-<!--						<goals>-->
-<!--							<goal>install-node-and-npm</goal>-->
-<!--						</goals>-->
-<!--						<configuration>-->
-<!--							<nodeVersion>v10.10.0</nodeVersion>-->
-<!--						</configuration>-->
-<!--					</execution>-->
-<!--					&lt;!&ndash; Install all project dependencies &ndash;&gt;-->
-<!--					<execution>-->
-<!--						<id>npm install</id>-->
-<!--						<goals>-->
-<!--							<goal>npm</goal>-->
-<!--						</goals>-->
-<!--						&lt;!&ndash; optional: default phase is "generate-resources" &ndash;&gt;-->
-<!--						<phase>generate-resources</phase>-->
-<!--						&lt;!&ndash; Optional configuration which provides for running any npm command &ndash;&gt;-->
-<!--						<configuration>-->
-<!--							<arguments>install</arguments>-->
-<!--						</configuration>-->
-<!--					</execution>-->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.7.6</version>
+				<executions>
+					<execution>
+						<!-- optional: you don't really need execution ids, but it looks nice in your build log. -->
+						<id>install node and yarn</id>
+						<goals>
+							<goal>install-node-and-yarn</goal>
+						</goals>
+						<!-- optional: default phase is "generate-resources" -->
+						<phase>generate-resources</phase>
+						<configuration>
+							<nodeVersion>v6.9.1</nodeVersion>
+							<yarnVersion>v0.16.1</yarnVersion>
 
-<!--					&lt;!&ndash; Build and minify static files &ndash;&gt;-->
-<!--					<execution>-->
-<!--						<id>npm run build</id>-->
-<!--						<goals>-->
-<!--							<goal>npm</goal>-->
-<!--						</goals>-->
-<!--						<configuration>-->
-<!--							<arguments>npm run-script build</arguments>-->
-<!--						</configuration>-->
-<!--					</execution>-->
-<!--				</executions>-->
-<!--			</plugin>-->
+							<nodeDownloadRoot>https://nodejs.org/dist/</nodeDownloadRoot>
+							<yarnDownloadRoot>https://github.com/yarnpkg/yarn/releases/download/</yarnDownloadRoot>
+						</configuration>
+					</execution>
+					<execution>
+						<id>yarn build</id>
+						<goals>
+							<goal>yarn</goal>
+						</goals>
+						<configuration>
+							<!-- optional: The default argument is actually
+                            "install", so unless you need to run some other yarn command,
+                            you can remove this whole <configuration> section.
+                            -->
+							<arguments>build</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
