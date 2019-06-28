@@ -1,7 +1,7 @@
 <template>
     <div>
         <label class='justify-content-start' for='drawSpeed'>
-            draw Speed:
+            draw speed:
             <input class='form-control ml-2' v-model='drawSpeed'/>
         </label>
         <input class='custom-range mt-2'
@@ -11,7 +11,7 @@
                min='1' max='100'>
 
         <label class='justify-content-start' for='countDrawingPoints'>
-            drawing points:
+            points count:
             <input class='form-control ml-2 mt-2' v-model='countDrawingPoints'/>
         </label>
         <input class='custom-range mt-2'
