@@ -12,9 +12,9 @@
         </nav>
 
         <div class='row mt-4 ml-1'>
-            <div class='col'>
+            <div class='col-7'>
                 <canvas id='canv'
-                        width='920'
+                        width='700'
                         height='950'
                         style='border: 2px solid black'
                         @click='addCorePoint'>
@@ -25,7 +25,7 @@
                     <button class='btn btn-primary my-2' type="button">Download image</button>
                 </a>
             </div>
-            <div class='col-lg col-sm'>
+            <div class='col-5'>
                 <div class='card mb-2'>
                     <div class='card-body'>
 
