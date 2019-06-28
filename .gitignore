@@ -30,3 +30,6 @@ HELP.md
 /node_modules
 
 /src/main/resources/static/js/
+
+yarn-error.log
+/node
