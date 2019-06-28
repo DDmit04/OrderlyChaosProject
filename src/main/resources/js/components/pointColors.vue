@@ -3,7 +3,7 @@
         <div v-if='pointArrayType == "new"'>
             <label class='justify-content-start'>
                 <b-form-checkbox class='mt-2' v-model="pointArray[selectedPoint].customSpeed"/>
-                point speed:
+                speed:
                 <input class='form-control ml-2 mt-2'
                        :disabled='!pointArray[selectedPoint].customSpeed'
                        v-model='pointArray[selectedPoint].speed'/>
@@ -14,7 +14,7 @@
                    type='range'
                    min='1' max='100'>
         </div>
-        <label class='justify-content-start' for='pointRed'>{{pointArrayType}} point red:
+        <label class='justify-content-start' for='pointRed'>{{pointArrayType}} red:
             <input class='form-control ml-2 mt-2' v-model='pointArray[selectedPoint].color.r'/>
         </label>
         <input class='custom-range mt-2'
@@ -23,7 +23,7 @@
                type='range'
                min='0' max='255'>
 
-        <label class='justify-content-start' for='pointGreen'>{{pointArrayType}} point green:
+        <label class='justify-content-start' for='pointGreen'>{{pointArrayType}} green:
             <input class='form-control ml-2 mt-2' v-model='pointArray[selectedPoint].color.g'/>
         </label>
         <input class='custom-range mt-2'
@@ -32,7 +32,7 @@
                type='range'
                min='0' max='255'>
 
-        <label class='justify-content-start' for='pointBlue'>{{pointArrayType}} point blue:
+        <label class='justify-content-start' for='pointBlue'>{{pointArrayType}} blue:
             <input class='form-control ml-2 mt-2' v-model='pointArray[selectedPoint].color.b'/>
         </label>
         <input class='custom-range mt-2'
