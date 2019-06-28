@@ -12,7 +12,7 @@
         </nav>
 
         <div class='row mt-4 ml-1'>
-            <div class='col-7'>
+            <div class='col-lg col-5-sm'>
                 <canvas id='canv'
                         width='700'
                         height='950'
@@ -25,7 +25,7 @@
                     <button class='btn btn-primary my-2' type="button">Download image</button>
                 </a>
             </div>
-            <div class='col-5-lg col-7-sm'>
+            <div class='col-lg col-7-sm'>
                 <div class='card mb-2'>
                     <div class='card-body'>
 
