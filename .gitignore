@@ -28,3 +28,5 @@ HELP.md
 ### VS Code ###
 .vscode/
 /node_modules
+
+/src/main/resources/static/js/

@@ -6,7 +6,6 @@ import {paintPoint, repaintDeletedCorePoint,
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-    strict: true,
     state: {
         drawingPointsLimit: drawingPointsLimit,
         drawingPoints: [
