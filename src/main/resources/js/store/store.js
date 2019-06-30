@@ -1,15 +1,27 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
 import {paintPoint, repaintDeletedCorePoint,
         unknownPointArrayTypeError, validateColors} from 'helpers/helpFunctions.js'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+    plugins: [createPersistedState({
+        paths: ['drawingPoints', 'selectedNewPoint', 'selectedOldPoint', 'selectedCorePoint',
+                'countDrawingPoints', 'oldCountDrawingPoints', 'oldPoints',
+                'allPoints', 'drawSpeed', 'pointSize', 'showAlert'],
+    })],
     state: {
+        showAlert: true,
         drawingPointsLimit: drawingPointsLimit,
+        allPointsLimit: allPointsLimit,
         drawingPoints: [
-            { color: {r: 255, g: 0, b: 0}, customSpeed: false, speed: 1 }
+            {
+                color: {r: 255, g: 0, b: 0},
+                customSpeed: false,
+                speed: 1
+            }
         ],
         selectedNewPoint: 0,
         countDrawingPoints: 1,
@@ -22,12 +34,11 @@ export default new Vuex.Store({
         allPoints: [ [] ],
         selectedCorePoint: 0,
         drawSpeed: 1,
-        pointSize: 20,
+        pointSize: 10,
         corePointSize: 15,
         drawingFunctionIsRunning: false,
         canvas: null,
         canvasCtx: null,
-        allPointsLimit: 90
     },
     getters: {
         getPointArray: (state) => (context) => {
@@ -54,6 +65,9 @@ export default new Vuex.Store({
         },
     },
     mutations: {
+        offShowAlertMutation(state) {
+            state.showAlert = false
+        },
         cleanAllPointsArrayMutation(state, drawingPointNumber) {
             state.allPoints[drawingPointNumber].splice(0, state.allPointsLimit)
         },
