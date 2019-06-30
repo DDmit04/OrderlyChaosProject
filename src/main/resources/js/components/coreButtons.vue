@@ -1,10 +1,9 @@
 <template>
     <div>
-        <button class='btn btn-success'
+        <button class='btn btn-success mt-sm-2'
                 data-toggle="tooltip"
                 data-placement="top"
-                title="make two point on canvas to start drawing"
-                :disabled='drawingFunctionIsRunning || corePoints.length < 2'
+                :disabled='drawingFunctionIsRunning || (corePoints.length < 2)'
                 @keyup.enter='startDraw'
                 @click='startDraw'>
             <div v-if='corePoints.length < 2'>
@@ -13,29 +12,29 @@
             <div v-else-if='drawingFunctionIsRunning'>
                 running
             </div>
-            <div v-else-if='allPoints[0].length > 0 && !drawingFunctionIsRunning'>
+            <div v-else-if='(allPoints[0].length > 0) && !drawingFunctionIsRunning'>
                 continue
             </div>
             <div v-else>
                 start
             </div>
         </button>
-        <button class='btn btn-primary'
+        <button class='btn btn-primary mt-sm-2'
                 :disabled='!drawingFunctionIsRunning'
                 @click='stopDraw'>
             stop
         </button>
-        <button class='btn btn-primary'
+        <button class='btn btn-primary mt-sm-2'
                 :disabled='corePoints.length < 2'
                 @click='drawOnePointFunction(0)'>
             draw one
         </button>
-        <button class='btn btn-danger'
+        <button class='btn btn-danger mt-sm-2'
                 :disabled='corePoints.length == 0 && allPoints[0].length == 0'
                 @click='resetCanvas'>
             reset
         </button>
-        <button class='btn btn-primary mt-lg-2'
+        <button class='btn btn-primary mt-sm-2'
                 :disabled='allPoints[0].length == 0'
                 @click='cleanOldPoints'>
             clean old points

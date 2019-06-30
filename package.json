@@ -13,11 +13,13 @@
     "bootstrap-vue": "^2.0.0-rc.22",
     "css-loader": "^2.1.1",
     "jquery": "^3.4.1",
+    "js-cookie": "^2.2.0",
     "vee-validate": "^2.2.11",
     "vue": "^2.6.10",
     "vue-awesome": "^3.5.4",
     "vue-resource": "^1.5.1",
-    "vuex": "^3.1.1"
+    "vuex": "^3.1.1",
+    "vuex-persistedstate": "^2.5.4"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",

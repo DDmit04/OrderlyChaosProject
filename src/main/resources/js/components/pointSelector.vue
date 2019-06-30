@@ -8,8 +8,7 @@
                      :style='{ background: objectToRgbFunction(somePoint.color) }'
                      style='border: 1px solid black'
                      @click='changeSelectedPoint(index)'
-                     @mouseover='addColorBoxStyle(pointArrayType + index)'
-                     @mouseout='removeColorBoxStyle(pointArrayType + index)'>
+                     >
                 </div>
             </div>
             <button class='btn btn-primary ml-2'
@@ -43,7 +42,6 @@
         name: "colorSelector",
         data() {
             return {
-                marginClass: 'mt-1',
                 objectToRgbFunction: objectToRgbFunction
             }
         },
@@ -64,14 +62,6 @@
         },
         methods: {
             ...mapActions(['resetPointColorsAction', 'updateColorSelectorAction', 'deleteCurrentCorePointAction']),
-            addColorBoxStyle(id) {
-                let colorBox = document.getElementById(id)
-                colorBox.style.outline = '2px solid rgb(0,150,255)'
-            },
-            removeColorBoxStyle(id) {
-                let colorBox = document.getElementById(id)
-                colorBox.style.outline = ''
-            },
             changeSelectedPoint(index) {
                 this.selectedPoint = index
             },
@@ -83,5 +73,8 @@
     .smallColorBox {
         width: 20px;
         height: 20px;
+    }
+    .smallColorBox:hover {
+        outline: 2px solid rgb(0,150,255)
     }
 </style>

@@ -1,8 +1,11 @@
 <template>
     <div class='container-fluid'>
-        <nav class='navbar navbar-expand-lg navbar-primary navbar-default bg-light scrolling-navbar'>
+        <nav class='navbar navbar-expand-lg navbar-primary navbar-default bg-light scrolling-navbar shadow'>
             <div class='navbar-nav mr-auto'>
                 <li class='nav-item'>
+                    <button class="openSidebarBtn mr-2"
+                            @click="sidebarOpened ? closeNav() : openNav()">&#9776;
+                    </button>
                     <a class="navbar-brand">Orderly Chaos</a>
                 </li>
             </div>
@@ -11,21 +14,8 @@
             </ul>
         </nav>
 
-        <div class='row mt-4 ml-1'>
-            <div class='col-lg col-5-sm'>
-                <canvas id='canv'
-                        width='700'
-                        height='950'
-                        style='border: 2px solid black'
-                        @click='addCorePoint'>
-                </canvas>
-                <a download="OrderlyChaos.png"
-                   :href='image'
-                   @click='downloadImage'>
-                    <button class='btn btn-primary my-2' type="button">Download image</button>
-                </a>
-            </div>
-            <div class='col-lg col-7-sm'>
+        <div id="sidebar" class="sidebar">
+            <div class='col-lg'>
                 <div class='card mb-2'>
                     <div class='card-body'>
 
@@ -33,32 +23,37 @@
                                      :startAllDrawingFunctions='startAllDrawingFunctions'
                                      :stopAllDrawingFunctions='stopAllDrawingFunctions'/>
 
-                        <div class='mt-4 form-inline'>
-                            <div class='col-sm'>
-                                <coreControls />
-                            </div>
-                            <b-tabs class='mt-3 col-sm'>
-                                <b-tab title='new point'>
-                                    <pointSelector :pointArrayType='"new"'/>
-                                    <pointColors :pointArrayType='"new"'
-                                                 :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
-                                </b-tab>
-                                <b-tab title='old point'>
-                                    <pointSelector :pointArrayType='"old"'/>
-                                    <pointColors :pointArrayType='"old"'
-                                                 :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
-                                </b-tab>
-                                <b-tab title='core point' :disabled='corePoints.length === 0'>
-                                    <div v-if='corePoints.length > 0'>
-                                        <pointSelector :pointArrayType='"core"'/>
-                                        <pointColors :pointArrayType="'core'"
-                                                     :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
-                                    </div>
-                                </b-tab>
-                            </b-tabs>
+                        <div class='mt-4'>
+                            <coreControls />
+                            <pointTabs :restartAllDrawingFunctions='restartAllDrawingFunctions'/>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class='row mt-4 ml-1'>
+            <div class='col-lg col-5-sm'>
+                <div>
+                    <b-alert v-if='showAlert'
+                             show dismissible
+                             :dismissed='!showAlert'>
+                        Put two and more points on the canvas and click 'start' on sidebar
+                        <a href='javascript:void(0)' @click='dontShowAlert'> (dont show again and close)</a>
+                    </b-alert>
+                </div>
+                <a download="OrderlyChaos.png"
+                   :href='image'
+                   @click='downloadImage'>
+                    <button class='btn btn-primary my-2' type="button">Download image</button>
+                </a>
+                <canvas id='canv'
+                        class='mr-3'
+                        width='1840'
+                        height='1000'
+                        style='border: 2px solid black'
+                        @click='addCorePoint'>
+                </canvas>
             </div>
         </div>
     </div>
@@ -66,23 +61,23 @@
 
 <script>
     import {mapMutations, mapState, mapActions} from 'vuex'
-    import pointColors from 'components/pointColors.vue'
-    import pointSelector from 'components/pointSelector.vue'
     import coreControls from 'components/coreControls.vue'
     import coreButtons from 'components/coreButtons.vue'
     import feedbackModal from 'components/feedbackModal.vue'
+    import pointTabs from 'components/pointTabs.vue'
 
     export default {
         name: 'Canv',
         components: {
-            pointColors,
-            pointSelector,
             coreControls,
             coreButtons,
-            feedbackModal
+            feedbackModal,
+            pointTabs
         },
         data() {
             return {
+                sidebar: null,
+                sidebarOpened: false,
                 image: null,
                 movingPoint: {
                     x: null,
@@ -92,11 +87,12 @@
             }
         },
         computed:
-            mapState(['drawingPoints', 'corePoints',
+            mapState(['drawingPoints', 'corePoints', 'showAlert',
                     'countDrawingPoints', 'pointSize', 'canvas',
                     'drawSpeed', 'allPoints', 'allPointsLimit',
                     'oldCountDrawingPoints', 'drawingFunctionIsRunning']),
         mounted: function () {
+            this.sidebar = document.getElementById('sidebar')
             this.initCanvasMutation(document.getElementById('canv'))
         },
         watch: {
@@ -128,7 +124,7 @@
             ...mapActions(['addCorePointAction']),
             ...mapMutations(['initCanvasMutation', 'addNewPointMutation',
                 'startDrawingFunctionMutation', 'stopDrawingFunctionsMutation',
-                'recolorOldPointMutation',
+                'recolorOldPointMutation', 'offShowAlertMutation',
                 'updateMovingPointMutation', 'cleanAllPointsArrayMutation']),
             downloadImage() {
                 this.image = this.canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
@@ -205,8 +201,40 @@
                     })
                 }
             },
+            openNav() {
+                this.sidebar.style.width = "40%"
+                this.sidebarOpened = true
+            },
+            closeNav() {
+                this.sidebar.style.width = "0"
+                this.sidebarOpened = false
+            },
+            dontShowAlert() {
+                this.offShowAlertMutation()
+            },
         }
     }
 </script>
 <style>
+    .sidebar {
+        height: 100%;
+        width: 0;
+        position: absolute;
+        z-index: 1;
+        top: 80px;
+        left: 0;
+        overflow-x: hidden;
+        transition: 0.5s;
+    }
+    .openSidebarBtn {
+        font-size: 20px;
+        cursor: pointer;
+        background-color: dodgerblue;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+    }
+    .openSidebarBtn:hover {
+        outline: 2px solid rgb(0,150,255)
+    }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class='form-inline'>
         <label class='justify-content-start' for='drawSpeed'>
             draw speed:
             <input class='form-control ml-2' v-model='drawSpeed'/>
@@ -18,7 +18,8 @@
                v-model='countDrawingPoints'
                id='countDrawingPoints'
                type='range'
-               min='1' :max='drawingPointsLimit'>
+               min='1'
+               :max='drawingPointsLimit'>
         <label class='justify-content-start' for='pointSize'>
             point size:
             <input class='form-control ml-2 mt-2' v-model='pointSize'/>

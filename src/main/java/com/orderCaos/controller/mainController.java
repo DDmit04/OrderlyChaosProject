@@ -11,13 +11,21 @@ public class mainController {
 	@Value("${application.drawingPointsLimit}")
 	private Long drawingPointsLimit;
 
+	@Value("${application.allPointsLimit}")
+	private Long allPointsLimit;
+
 	@Value("${spring.profiles.active:prod}")
 	private String profile;
 
 	@GetMapping("/")
 	public String app(Model model) {
-		model.addAttribute("isDevMode", profile);
+		boolean isDevMode = true;
+		if(profile.equals("prod")) {
+			isDevMode = false;
+		}
+		model.addAttribute("isDevMode", isDevMode);
 		model.addAttribute("drawingPointsLimit", drawingPointsLimit);
+		model.addAttribute("allPointsLimit", allPointsLimit);
 		return "index";
 	}
 
