@@ -8,11 +8,12 @@
                v-model='drawSpeed'
                id='drawSpeed'
                type='range'
-               min='1' max='100'>
+               min='1'
+               :max='drawSpeedLimit'>
 
         <label class='justify-content-start' for='countDrawingPoints'>
             points count:
-            <input class='form-control ml-2 mt-2' v-model='countDrawingPoints'/>
+            <input class='form-control ml-2 mt-2' type='number' v-model='countDrawingPoints'/>
         </label>
         <input class='custom-range mt-2'
                v-model='countDrawingPoints'
@@ -28,7 +29,8 @@
                v-model='pointSize'
                id='pointSize'
                type='range'
-               min='1' max='30'>
+               min='1'
+               :max='pointSizeLimit'>
 
         <button class='btn btn-danger mt-2' @click='resetAllSettingsAction'>
             reset all points settings
@@ -38,10 +40,11 @@
 
 <script>
     import {mapActions, mapState} from 'vuex'
+
     export default {
         name: "coreControls",
         computed: {
-            ...mapState(['drawingPointsLimit']),
+            ...mapState(['drawingPointsLimit', 'drawSpeedLimit', 'pointSizeLimit']),
             countDrawingPoints: {
                 get() { return this.$store.state.countDrawingPoints },
                 set(newVal) { this.updateCountDrawingPointsAction(newVal) }

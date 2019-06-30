@@ -11,8 +11,14 @@ public class mainController {
 	@Value("${application.drawingPointsLimit}")
 	private Long drawingPointsLimit;
 
-	@Value("${application.allPointsLimit}")
-	private Long allPointsLimit;
+	@Value("${application.pointSizeLimit}")
+	private Long pointSizeLimit;
+
+	@Value("${application.drawSpeedLimit}")
+	private Long drawSpeedLimit;
+
+	@Value("${application.cleanAllPointsLimit}")
+	private Long cleanAllPointsLimit;
 
 	@Value("${spring.profiles.active:prod}")
 	private String profile;
@@ -25,7 +31,9 @@ public class mainController {
 		}
 		model.addAttribute("isDevMode", isDevMode);
 		model.addAttribute("drawingPointsLimit", drawingPointsLimit);
-		model.addAttribute("allPointsLimit", allPointsLimit);
+		model.addAttribute("allPointsLimit", cleanAllPointsLimit);
+		model.addAttribute("pointSizeLimit", pointSizeLimit);
+		model.addAttribute("drawSpeedLimit", drawSpeedLimit);
 		return "index";
 	}
 

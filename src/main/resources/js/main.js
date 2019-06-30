@@ -8,7 +8,12 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon.vue'
-import VeeValidate from 'vee-validate';
+import VeeValidate from 'vee-validate'
+import VueResize from 'vue-resize'
+import 'vue-resize/dist/vue-resize.css'
+
+
+Vue.use(VueResize)
 
 Vue.use(VeeValidate, {
     classes: true,

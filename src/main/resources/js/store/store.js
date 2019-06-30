@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
-import {paintPoint, repaintDeletedCorePoint,
-        unknownPointArrayTypeError, validateColors} from 'helpers/helpFunctions.js'
+import {paintPoint, repaintDeletedCorePoint, unknownPointArrayTypeError, validateColors} from 'helpers/helpFunctions.js'
 
 Vue.use(Vuex)
 
@@ -10,12 +9,14 @@ export default new Vuex.Store({
     plugins: [createPersistedState({
         paths: ['drawingPoints', 'selectedNewPoint', 'selectedOldPoint', 'selectedCorePoint',
                 'countDrawingPoints', 'oldCountDrawingPoints', 'oldPoints',
-                'allPoints', 'drawSpeed', 'pointSize', 'showAlert'],
+                'drawSpeed', 'pointSize', 'showAlert'],
     })],
     state: {
         showAlert: true,
         drawingPointsLimit: drawingPointsLimit,
-        allPointsLimit: allPointsLimit,
+        cleanAllPointsLimit: cleanAllPointsLimit,
+        pointSizeLimit: pointSizeLimit,
+        drawSpeedLimit: drawSpeedLimit,
         drawingPoints: [
             {
                 color: {r: 255, g: 0, b: 0},
@@ -69,7 +70,7 @@ export default new Vuex.Store({
             state.showAlert = false
         },
         cleanAllPointsArrayMutation(state, drawingPointNumber) {
-            state.allPoints[drawingPointNumber].splice(0, state.allPointsLimit)
+            state.allPoints[drawingPointNumber].splice(0, state.cleanAllPointsLimit)
         },
         resetCanvasMutation(state) {
             state.canvasCtx.clearRect(0, 0, state.canvas.width, state.canvas.height)
@@ -199,14 +200,19 @@ export default new Vuex.Store({
                 state.selectedCorePoint = selectedCorePoint - 1
             }
         },
-        initCanvasMutation(state, canvas) {
+        initCanvasMutation(state, payload) {
+            let canvas = payload.canvas
             state.canvas = canvas
+            state.canvas.width = payload.canvasWidth
             if(canvas.getContext == null) {
                 console.error('init canvas context error')
             } else {
                 state.canvasCtx = canvas.getContext('2d')
             }
-        }
+        },
+        changeCanvasSizeMutation(state, width) {
+            state.canvas.width = width
+        },
     },
     actions: {
         deleteCurrentCorePointAction({state, commit}) {
