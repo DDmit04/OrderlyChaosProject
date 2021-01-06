@@ -12,7 +12,7 @@
     "bootstrap": "^4.3.1",
     "bootstrap-vue": "^2.0.0-rc.22",
     "css-loader": "^2.1.1",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "js-cookie": "^2.2.0",
     "vee-validate": "^2.2.11",
     "vue": "^2.6.10",
